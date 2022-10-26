@@ -61,16 +61,14 @@ for ii = 1:MAX_ITER
     end
     %% --- MPC ----
     % form QP
-    [H,g,Aineq,bineq,Aeq,beq] = fcn_get_QP_form_eta(Xt,Ut,Xd,Ud,p);
-    %[F,G,A_ineq,b_ineq,b_ineq_x0] = get_QP(A,B,C,P,Q_i,R_i,N,u_min,u_max,y_min,y_max);
+    %[H,g,Aineq,bineq,Aeq,beq] = fcn_get_QP_form_eta(Xt,Ut,Xd,Ud,p);
+    [A,B,C] = get_ABC(Xt,p);
+    [F,G,A_ineq,b_ineq,b_ineq_x0] = get_QP(A,B,C,P,Q_i,R_i,N);
 
-    if ~use_qpSWIFT
-        % solve QP using quadprog
-        [zval] = quadprog(H,g,Aineq,bineq,Aeq,beq,[],[]);
-    else
-        % interface with the QP solver qpSWIFT
-        [zval,basic_info] = qpSWIFT(sparse(H),g,sparse(Aeq),beq,sparse(Aineq),bineq);
-    end
+    % solve QP using quadprog
+    b_ineq = b_ineq + b_ineq_x0;
+    f = X'*F';
+    [zval] = quadprog(G,f,Aineq,bineq,Aeq,beq,[],[]);
 
     %get the foot forces value for first time step and repeat
     Ut = Ut + zval(1:12);
