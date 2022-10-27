@@ -19,6 +19,7 @@ p = get_params(gait);
 p.playSpeed = 1;
 p.flag_movie = 1;       % 1 - make movie
 use_qpSWIFT = 0;        % 0 - quadprog, 1 - qpSWIFT (external)
+N = p.predHorizon;
 
 dt_sim = p.simTimeStep;
 SimTimeDuration = 5;  % [sec]
@@ -63,52 +64,57 @@ for ii = 1:MAX_ITER
 
     % set up selection matrix (makes problem infeasible)
     % S = 0 if feet not in contant
-    S = Ud(:,1);
+    S = Ud;
     S(S~=0)=1;
     Selection = [Selection, S];
-    %idx = any(reshape(S,3,4));
-    %stance_feet = ones(3,4).*idx;
+
+    % current stance feet
+    idx = any(reshape(S,3,4*N));
+    stance_feet = ones(3,4*N).*idx;
+
+    % future idx for feet in contact for horizon 
+    idx = reshape(idx,4,p.predHorizon);
+    
 
     %% --- MPC ----
+    i=1;
+    [A,B,C] = get_ABC(Xt,idx,p,i);
     
-    %[H,g,Aineq,bineq,Aeq,beq] = fcn_get_QP_form_eta(Xt,Ut,Xd,Ud,p);
-    [A,B,C] = get_ABC(Xt,p);
-
     % form QP
-    [F,G,A_ineq,b_ineq,b_ineq_x0] = get_QP(A,B,C,P,Q_i,R_i,N);
-
-    % solve QP using quadprog
-    b_ineq = b_ineq + b_ineq_x0;
-    f = X'*F';
-    [zval] = quadprog(G,f,Aineq,bineq,Aeq,beq,[],[]);
-
-    %get the foot forces value for first time step and repeat
-    Ut = zval(1:12);
-    
-    % logging
-    i_hor = 1;
-    Ut_ref = [Ut_ref, Ut];
-    Ud_ref = [Ud_ref, Ud(:,i_hor)];     
-    %% --- simulate without any external disturbances ---
-    [t,X] = ode45(@(t,X)dynamics_SRB(t,X,Ut,Xd,0,p),[tstart,tend],Xt);
-    
-    
-    %% --- update ---
-    Xt = X(end,:)';
-    tstart = tend;
-    tend = tstart + dt_sim;
-    
-    %% --- log ---  
-    lent = length(t(2:end));
-    tout = [tout;t(2:end)];
-    Xout = [Xout;X(2:end,:)];
-    Uout = [Uout;repmat(Ut',[lent,1])];
-    Xdout = [Xdout;repmat(Xd(:,1)',[lent,1])];
-    Udout = [Udout;repmat(Ud(:,1)',[lent,1])];
-    Uext = [Uext;repmat(u_ext',[lent,1])];
-    FSMout = [FSMout;repmat(FSM',[lent,1])];
-    
-    waitbar(ii/MAX_ITER,h_waitbar,'Calculating...');
+    [F,G,A_ineq,b_ineq] = get_QP(A,B,C,N,Ud,idx,p);
+% 
+%     % solve QP using quadprog
+%     b_ineq = b_ineq + b_ineq_x0;
+%     f = X'*F';
+%     [zval] = quadprog(G,f,Aineq,bineq,Aeq,beq,[],[]);
+% 
+%     %get the foot forces value for first time step and repeat
+%     Ut = zval(1:12);
+%     
+%     % logging
+%     i_hor = 1;
+%     Ut_ref = [Ut_ref, Ut];
+%     Ud_ref = [Ud_ref, Ud(:,i_hor)];     
+%     %% --- simulate without any external disturbances ---
+%     [t,X] = ode45(@(t,X)dynamics_SRB(t,X,Ut,Xd,0,p),[tstart,tend],Xt);
+%     
+%     
+%     %% --- update ---
+%     Xt = X(end,:)';
+%     tstart = tend;
+%     tend = tstart + dt_sim;
+%     
+%     %% --- log ---  
+%     lent = length(t(2:end));
+%     tout = [tout;t(2:end)];
+%     Xout = [Xout;X(2:end,:)];
+%     Uout = [Uout;repmat(Ut',[lent,1])];
+%     Xdout = [Xdout;repmat(Xd(:,1)',[lent,1])];
+%     Udout = [Udout;repmat(Ud(:,1)',[lent,1])];
+%     Uext = [Uext;repmat(u_ext',[lent,1])];
+%     FSMout = [FSMout;repmat(FSM',[lent,1])];
+%     
+%     waitbar(ii/MAX_ITER,h_waitbar,'Calculating...');
 end
 close(h_waitbar)
 fprintf('Calculation Complete!\n')

@@ -1,4 +1,4 @@
-function [A,B,C] = get_ABC(Xt,p)
+function [A,B,C] = get_ABC(Xt,idx,p,i)
 
 %% system parameters
 mass = p.mass;
@@ -25,22 +25,34 @@ r1_hat = hatMap(r34(:,1));
 r2_hat = hatMap(r34(:,2));
 r3_hat = hatMap(r34(:,3));
 r4_hat = hatMap(r34(:,4));
+r_hat = [r1_hat;r2_hat;r3_hat;r4_hat];
 
 %% continuous time LTV system dynamics
 % states = [p p_dot theta omega gravity]
-zero = zeros(3,3);
-one = eye(3,3);
+zero_A = zeros(3,3);
+one_A = eye(3,3);
 I_inv = I_w^-1;
 
-A_psi = [zero,  zero,   zero,   one;...
-         zero,  zero,   zero,   zero;...
-         zero,  zero,   R_psi,  zero;...
-         zero,  zero,   zero,   zero];
+A_psi = [zero_A,  zero_A,   zero_A,   one_A;...
+         zero_A,  zero_A,   zero_A,   zero_A;...
+         zero_A,  zero_A,   R_psi,    zero_A;...
+         zero_A,  zero_A,   zero_A,   zero_A];
 
-B_psi = [zero,          zero,           zero,           zero;...
-         zero,          zero,           zero,           zero;...
-         I_inv*r1_hat,  I_inv*r2_hat,   I_inv*r3_hat ,  I_inv*r4_hat;...
-         one./mass,     one./mass,      one./mass,      one./mass];
+% fixed size B_psi
+% B_psi = [zero,          zero,           zero,           zero;...
+%          zero,          zero,           zero,           zero;...
+%          I_inv*r1_hat,  I_inv*r2_hat,   I_inv*r3_hat ,  I_inv*r4_hat;...
+%          one./mass,     one./mass,      one./mass,      one./mass];
+
+% variable size B_psi
+B_feet =  [I_inv*r1_hat,  I_inv*r2_hat,   I_inv*r3_hat ,  I_inv*r4_hat];
+B_feet = B_feet.*kron(idx(:,i)',ones(3,3));
+B_feet(:,all(~B_feet,1)) = []; % make zero columns as null
+
+zero_B = zeros(size(B_feet));
+num_feet_contact = length(nonzeros(idx(:,i)));
+one_B = repmat(eye(3),1,num_feet_contact);
+B_psi = [zero_B; zero_B; B_feet; one_B./mass];
 
 A_aug = [A_psi,                 zeros(size(A_psi,1),1);...
         zeros(1,size(A_psi,2)), 1];
