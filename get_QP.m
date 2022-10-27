@@ -1,11 +1,8 @@
-function [F, G, A_ineq, b_ineq, b_ineq_x0] = get_QP(A,B,C,P,Q_i,R_i,N,u_min,u_max,y_min,y_max)
+function [F, G, A_ineq, b_ineq, b_ineq_x0] = get_QP(A,B,C,N,Ud,p)
     % Inputs
     % A (system dynamics)                       : n x n
     % B (control input)                         : n x p
     % C (system output)                         : n x m
-    % P (termail cost)                          : n x 1
-    % Q_i (state cost for stage i)              : n(N-1) x n(N-1)
-    % R_i (control cost)                        : p(N-1) x p(N-1)
     % N is prediction horizon                   : scalar
     % u_min is min the control bound            : scalar
     % u_max is max the control bound            : scalar
@@ -29,11 +26,16 @@ function [F, G, A_ineq, b_ineq, b_ineq_x0] = get_QP(A,B,C,P,Q_i,R_i,N,u_min,u_ma
     % b_ineq_x0 (augmented ineq constraint cx)  : 2(p+m)(N) x 1
     % augmented ineq constraint                 : A_ineq * X <= b_ineq + b_ineqx0 * x0
 
-    
+    %% define costs
+    P = eye(size(A)); % terminal cost
+    Q_i = eye(size(A)); % terminal cost
+    R_i = eye(size(B,2)); % terminal cost
+
     n = size(A,2); % state dimension
     p = size(B,2); % control dimension
-    m = size(C,1); % output dimension
-
+    m = size(C,1); % output dimension 
+    
+    %% Augmented cost
     A_hat = zeros(n*N,n);
     b = [];
     B_hat = zeros(n*N,p*N);
@@ -43,8 +45,7 @@ function [F, G, A_ineq, b_ineq, b_ineq_x0] = get_QP(A,B,C,P,Q_i,R_i,N,u_min,u_ma
         b = [A^(i-1)*B, b];
         B_hat((i-1)*n+1:i*n,1:i*p) = b;
     end
-    
-    %% Augmented cost
+
     Q_hat = [];
     R_hat = [];
     for i = 1:N-1
@@ -60,74 +61,16 @@ function [F, G, A_ineq, b_ineq, b_ineq_x0] = get_QP(A,B,C,P,Q_i,R_i,N,u_min,u_ma
     F = 2*B_hat'*Q_hat*A_hat;
     
     %% Augmented inequality constraint
-    M_i = []; E_i = []; b_i = [];
-    M_N = []; b_N = [];
-    
-    no_con = 1; % True if constraints = []
-    if(~isempty(u_min))
-        no_con = 0;
-        M_i = [M_i; zeros(p,n)];
-        E_i = [E_i; -eye(p,p)];
-        b_i = [b_i; -u_min];
-    end
-    
-    if(~isempty(u_max))
-        no_con = 0;
-        M_i = [M_i; zeros(p,n)];
-        E_i = [E_i; eye(p,p)];
-        b_i = [b_i; u_max];
-    end
 
-    if(~isempty(y_min))
-        no_con =0;
-        M_i = [M_i; -C];
-        E_i = [E_i; zeros(m,p);];
-        b_i = [b_i; -y_min];
-        M_N = [M_N; -C];
-        b_N = [b_N; -y_min];
-    end
+    % define friction constraints
+    mu = p.mu;
+    % set max values of fi_z
+    Fzd = Ud([3 6 9 12],i_hor);
+    fi_z_lb = 0.5 * Fzd;
+    fi_z_ub = 1.5 * Fzd;
     
-    if(~isempty(y_max))
-        no_con = 0;
-        M_i = [M_i; C];
-        E_i = [E_i; zeros(m,p)];
-        b_i = [b_i; y_max];
-        M_N = [M_N; C];
-        b_N = [b_N; y_max];
-    end
-    
-    M_hat = [];
-    M_0 = [];  
-    E_hat = E_i; % initial
-    b_hat = b_i; % initial
-    for i = 1:N-1
-        M_hat = blkdiag(M_hat, M_i);
-        E_hat = blkdiag(E_hat, E_i);
-        b_hat = [b_hat; b_i];
-        M_0 = [M_0; zeros(size(M_i))];
-    end
-
-    % get the last elements for i=N
-    M_hat = blkdiag(M_hat, M_N);
-    M_0 = [M_0; zeros(size(M_i))];
-    if(isempty(M_N))
-        M_hat = [M_hat, zeros(size(M_hat,1),n)];
-    end
-    b_hat = [b_hat; b_N];
-
-    % augment zeros for to match dimensions for i=N
-    M_hat = [zeros(size(M_i,1),size(M_hat,2)); M_hat];
-    M_0 = [M_0; zeros(size(M_N))];
-    E_hat = [E_hat; zeros(size(M_N,1),size(E_hat,2))];
-    
-    % Augmented inequality constraint: A_ineq * X <= b_ineq + b_ineqx0 * x0
-    if(no_con)
-        A_ineq = [];
-        b_ineq_x0 = [];
-        b_ineq = [];        
-    else
-        A_ineq = M_hat*B_hat + E_hat;
-        b_ineq_x0 = -(M_hat*A_hat + M_0);
-        b_ineq = b_hat;
-    end   
+    Aineq = [1 0 -mu;-1 0 -mu;0 1 -mu;0 -1 -mu;0 0 1; 0 0 -1];
+    B_ineq = [0; 0; 0; 0; 1; -1];
+    A_ineq_i = kron(eye(4),A_ineq);
+    B_ineq_i = [B_ineq; B_ineq; B_ineq; B_ineq];
 end

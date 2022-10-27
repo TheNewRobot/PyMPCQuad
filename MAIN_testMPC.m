@@ -1,4 +1,4 @@
-% This code is used to develop a convex MPC for
+% This code is used to develop a energy shaping controller for
 % quadruped locomotion
 
 % Reference code used from preprint available at: https://arxiv.org/abs/2012.10002
@@ -48,7 +48,6 @@ tend = dt_sim;
 h_waitbar = waitbar(0,'Calculating...');
 tic
 Ut_ref = []; Ud_ref = [];
-Selection = [];
 
 for ii = 1:MAX_ITER
     % --- time vector ---
@@ -60,37 +59,30 @@ for ii = 1:MAX_ITER
     else
         [FSM,Xd,Ud,Xt] = fcn_FSM(t_,Xt,p);
     end
-
-    % set up selection matrix (makes problem infeasible)
-    % S = 0 if feet not in contant
-    S = Ud(:,1);
-    S(S~=0)=1;
-    Selection = [Selection, S];
-    %idx = any(reshape(S,3,4));
-    %stance_feet = ones(3,4).*idx;
-
     %% --- MPC ----
-    
-    %[H,g,Aineq,bineq,Aeq,beq] = fcn_get_QP_form_eta(Xt,Ut,Xd,Ud,p);
-    [A,B,C] = get_ABC(Xt,p);
-
     % form QP
-    [F,G,A_ineq,b_ineq,b_ineq_x0] = get_QP(A,B,C,P,Q_i,R_i,N);
+    [H,g,Aineq,bineq,Aeq,beq] = fcn_get_QP_form_eta(Xt,Ut,Xd,Ud,p);
 
-    % solve QP using quadprog
-    b_ineq = b_ineq + b_ineq_x0;
-    f = X'*F';
-    [zval] = quadprog(G,f,Aineq,bineq,Aeq,beq,[],[]);
+    if ~use_qpSWIFT
+        % solve QP using quadprog
+        [zval] = quadprog(H,g,Aineq,bineq,Aeq,beq,[],[]);
+    else
+        % interface with the QP solver qpSWIFT
+        [zval,basic_info] = qpSWIFT(sparse(H),g,sparse(Aeq),beq,sparse(Aineq),bineq);
+    end
 
     %get the foot forces value for first time step and repeat
-    Ut = zval(1:12);
-    
-    % logging
+    Ut = Ut + zval(1:12);
     i_hor = 1;
     Ut_ref = [Ut_ref, Ut];
-    Ud_ref = [Ud_ref, Ud(:,i_hor)];     
+    Ud_ref = [Ud_ref, Ud(:,i_hor)]; 
+    %% --- external disturbance ---
+    [u_ext,p_ext] = fcn_get_disturbance(tstart,p);
+    p.p_ext = p_ext;        % position of external force
+    u_ext = u_ext;
+    
     %% --- simulate without any external disturbances ---
-    [t,X] = ode45(@(t,X)dynamics_SRB(t,X,Ut,Xd,0,p),[tstart,tend],Xt);
+    [t,X] = ode45(@(t,X)dynamics_SRB(t,X,Ut,Xd,u_ext,p),[tstart,tend],Xt);
     
     
     %% --- update ---
