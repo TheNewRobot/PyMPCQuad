@@ -1,49 +1,53 @@
-function [F, G, A_ineq, b_ineq] = get_QP(A,B,C,N,Ud,idx,p)
-    % Inputs
-    % A (system dynamics)                       : n x n
-    % B (control input)                         : n x p
-    % C (system output)                         : n x m
-    % N is prediction horizon                   : scalar
-    % Augments
-    % Q_hat (augmented Q)                       : n(N) x n(N)
-    % R_hat (augmented R)                       : p(N) x p(N)
-    % A_hat (augmented A)                       : n(N) x n(N)
-    % B_hat (augmented B)                       : n(N) x p(N)
+function [F, G, A_ineq, b_ineq] = get_QP(Xd,Ud,idx,N,params)
+% Inputs
+% Xd (desired states)
+% Ud (desired foot forces)
+% idx (index of feet in contact over horizon)
+% N is prediction horizon                   : scalar
+% params (dict of parameters)
 
-    % Outputs
-    % G (augmented cost)                        : p(N) x p(N)
-    % F (augmented cost)                        : p(N) x 1
-    % augmented cost                            : 1/2 * X^T * G * X + X^T * F * x0
-    % A_ineq (augmented ineq constraint A)      : (p+m)(N) x (p+m)(N)
-    % b_ineq (augmented ineq constraint b)      : 2(p+m)(N) x 1
-    % augmented ineq constraint                 : A_ineq * X <= b_ineq
+% Augments
+% Q_hat (augmented Q)                       : n(N) x n(N)
+% R_hat (augmented R)                       : p(N) x p(N)
+% A_hat (augmented A)                       : n(N) x n(N)
+% B_hat (augmented B)                       : n(N) x p(N)
 
+% Outputs
+% G (augmented cost)                        : p(N) x p(N)
+% F (augmented cost)                        : p(N) x 1
+% augmented cost                            : 1/2 * X^T * G * X + X^T * F * x0
+% A_ineq (augmented ineq constraint A)      : (p+m)(N) x (p+m)(N)
+% b_ineq (augmented ineq constraint b)      : 2(p+m)(N) x 1
+% augmented ineq constraint                 : A_ineq * X <= b_ineq
+
+   %% get system matrices
+    A = get_A(Xd);
+    horizon_i = 1;
+    B_0 = get_B(Xt,idx,horizon_i,params);
+    C = eye(size(A));
+
+    n = size(A,2); % state dimension columns (n x n)
+    p = size(B_0,2); % control dimension columns (n x p)
+    m = size(C,1); % output dimension (m x n)
+    
     %% define costs
     P = eye(size(A)); % terminal cost
     Q_i = eye(size(A)); % terminal cost
     R_i = eye(size(B,2)); % terminal cost
     
     %% Augmented cost
-    [A_0,B_0,~] = get_ABC(Xt,idx,p,i);
+    A_hat = zeros(n*N,n);
+    B = []; b = [];
+    B_hat = []; % set max value for number of columns
+    
+    for i = 1:N % iterate rows to get A_hat
+        A_hat((i-1)*n+1:i*n,:) = A^i; 
+    end
 
-    n = size(A_0,2); % state dimension
-    p = size(B_0,2); % control dimension
-    m = size(C,1); % output dimension 
-
-
-    A_hat = A_0;
-    A_hat2 = [];
-    B_hat = zeros(n*N,p*N); % set max value for number of columns
-    b = B_0;
-    B_hat(1:n,1:p) = b;
-
-    for i = 2:N
-        [A_i,B_i,~] = get_ABC(Xt,idx,p,i);
-        A_hat = [A_hat; A_i*A_hat(end-3:end,:)];
-        A_hat2 = [A_hat2, A_hat(1:end-3,:)];
-        b = [A_hat2*B_i, B_i];
-        B_hat((i-1)*n+1:i*n,1:i*p) = b;
-        
+    for i = 1:N % iterate columns to get B_hat
+        B_i = get_B(Xt,idx,i,params);
+        a = [zeros(i*n,n); eye(n); A_hat(1:end-n,:)];
+        B_hat = [B_hat; a*B_i];
     end
 
     Q_hat = [];
@@ -63,7 +67,7 @@ function [F, G, A_ineq, b_ineq] = get_QP(A,B,C,N,Ud,idx,p)
     %% Augmented inequality constraint
 
     % get number of feet in contact
-    num_feet_contact = size(stance_feet(:,all(stance_feet,1)),2);
+    num_feet_contact = length(nonzeros(idx(:,horizon_i)));
 
     % define friction constraints
     mu = p.mu;

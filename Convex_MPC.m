@@ -77,11 +77,9 @@ for ii = 1:MAX_ITER
     
 
     %% --- MPC ----
-    i=1;
-    [A,B,C] = get_ABC(Xt,idx,p,i);
-    
+   
     % form QP
-    [F,G,A_ineq,b_ineq] = get_QP(A,B,C,N,Ud,idx,p);
+    [F, G, A_ineq, b_ineq] = get_QP(Xd,Ud,idx,N,p);
 % 
 %     % solve QP using quadprog
 %     b_ineq = b_ineq + b_ineq_x0;
