@@ -64,8 +64,7 @@ function [F, G, A_ineq, b_ineq] = get_QP(Xt,Xd,Ud,idx,N,params)
         thetad = [thetad, veeMap(logm(Rd))];      
     end
     Q_hat(end-n+1:end,end-n+1:end) = P;
-    X_des = [X_des;thetad;wd;g.*ones(1,length(xd))]; 
-    
+    X_des = [X_des;thetad;wd;g.*ones(1,N)];     
     
     for i = 1:N % iterate columns to get B_hat
         %% Augmented Cost
