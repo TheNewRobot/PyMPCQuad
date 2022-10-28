@@ -1,4 +1,4 @@
-function [F, G, A_ineq, b_ineq] = get_QP(Xd,Ud,idx,N,params)
+function [F, G, A_ineq, b_ineq] = get_QP(Xt,Xd,Ud,idx,N,params)
 % Inputs
 % Xd (desired states)
 % Ud (desired foot forces)
@@ -20,66 +20,92 @@ function [F, G, A_ineq, b_ineq] = get_QP(Xd,Ud,idx,N,params)
 % b_ineq (augmented ineq constraint b)      : 2(p+m)(N) x 1
 % augmented ineq constraint                 : A_ineq * X <= b_ineq
 
-   %% get system matrices
-    A = get_A(Xd);
-    horizon_i = 1;
-    B_0 = get_B(Xt,idx,horizon_i,params);
-    C = eye(size(A));
+    %% get system matrices
+    % define friction constraints
+    mu = params.mu;
+    g = 9.81;
+    dT = 0.2;
 
+    A = get_A(Xd);
+    B = get_B(Xt,Xd,idx,1,params);
+    C = eye(size(A));
+    sys=ss(A,B,C,0);
+    [A, ~, C] = ssdata(c2d(sys,dT)); %discretize A
     n = size(A,2); % state dimension columns (n x n)
-    p = size(B_0,2); % control dimension columns (n x p)
-    m = size(C,1); % output dimension (m x n)
-    
+
+    %% get current and desired states
+    % states = [p p_dot theta omega gravity]
+    xt = Xt(1:3,:); vt = Xt(4:6,:);
+    Rt = reshape(Xt(7:15,:),[3,3]);
+    thetat = veeMap(logm(Rt)); wt = Xt(16:18,:); 
+    X_cur = [xt;vt;thetat;wt;g]; 
+
+    xd = Xd(1:3,:); vd = Xd(4:6,:);
+    thetad = []; wd = Xd(16:18,:);  
+    X_des = [xd;vd];
+
     %% define costs
-    P = eye(size(A)); % terminal cost
-    Q_i = eye(size(A)); % terminal cost
-    R_i = eye(size(B,2)); % terminal cost
+    P = 1e5*eye(size(A)); % terminal cost
+    Q_i = 1e5*eye(size(A)); % stage cost
     
-    %% Augmented cost
+    %% Build QP Matrices
     A_hat = zeros(n*N,n);
     B = []; b = [];
     B_hat = []; % set max value for number of columns
-    
+    Q_hat = []; R_hat = [];
+    A_ineq = []; b_ineq = [];
+
     for i = 1:N % iterate rows to get A_hat
-        A_hat((i-1)*n+1:i*n,:) = A^i; 
-    end
-
-    for i = 1:N % iterate columns to get B_hat
-        B_i = get_B(Xt,idx,i,params);
-        a = [zeros(i*n,n); eye(n); A_hat(1:end-n,:)];
-        B_hat = [B_hat; a*B_i];
-    end
-
-    Q_hat = [];
-    R_hat = [];
-    for i = 1:N-1
+        A_hat((i-1)*n+1:i*n,:) = A^i;
         Q_hat = blkdiag(Q_hat, Q_i);
-        R_hat = blkdiag(R_hat, R_i);
+
+        % get euler angles for each horizon
+        Rd = reshape(Xd(7:15,i),[3,3]);
+        thetad = [thetad, veeMap(logm(Rd))];      
     end
-    % add the cost for terminal states and control
-    Q_hat = blkdiag(Q_hat,P);
-    R_hat = blkdiag(R_hat,R_i);
+    Q_hat(end-n+1:end,end-n+1:end) = P;
+    X_des = [X_des;thetad;wd;g.*ones(1,length(xd))]; 
+    
+    
+    for i = 1:N % iterate columns to get B_hat
+        %% Augmented Cost
+        B_i = get_B(Xt,Xd,idx,i,params);
+        sys=ss(A,B_i,C,0);
+        [~, B_i, ~] = ssdata(c2d(sys,dT)); %discretize B
 
-    % Augmented cost: 1/2 * X^T * G * X + X^T * F * x0 
+        a = [zeros(i*n,n); eye(n); A_hat(1:end-i*n,:)];
+        B_hat = [B_hat, a(n+1:end,:)*B_i];
+        R_i = 0.01*eye(size(B_i,2));
+        R_hat = blkdiag(R_hat, R_i);
+        
+        %% Augmented inequality constraint
+        % get number of feet in contact
+        num_feet_contact = length(nonzeros(idx(:,i)));
+        
+        A_ineq_i = [ 1  0 -mu;...
+                    -1  0 -mu;...
+                     0  1 -mu;...
+                     0 -1 -mu;...
+                     0  0  1;...
+                     0  0 -1];
+        A_ineq_i = kron(eye(num_feet_contact),A_ineq_i);
+        A_ineq = blkdiag(A_ineq, A_ineq_i);
+        % set max values of fi_z
+        Fzd = Ud([3 6 9 12],i);
+        fi_z_lb = 0.5 * max(Fzd);
+        fi_z_ub = 1.5 * max(Fzd);
+        
+        b_ineq_i = [0; 0; 0; 0; fi_z_ub; -fi_z_lb];
+        b_ineq_i = repmat(b_ineq_i,num_feet_contact,1);
+        b_ineq = [b_ineq; b_ineq_i];
+
+    end
+    R_N = eye(size(B_i)); % terminal cost
+    p = size(R_N,2); % get last columns
+    %R_hat(end-n+1:end,end-p+1:end) = R_N;
+
+    % Augmented cost: 1/2 * U^T * G * U + U^T * F
     G = 2*(R_hat + B_hat'*Q_hat*B_hat);
-    F = 2*B_hat'*Q_hat*A_hat;
-    
-    %% Augmented inequality constraint
-
-    % get number of feet in contact
-    num_feet_contact = length(nonzeros(idx(:,horizon_i)));
-
-    % define friction constraints
-    mu = p.mu;
-    % set max values of fi_z
-    Fzd = Ud([3 6 9 12],i_hor);
-    fi_z_lb = 0.5 * Fzd;
-    fi_z_ub = 1.5 * Fzd;
-    
-    Aineq = [1 0 -mu;-1 0 -mu;0 1 -mu;0 -1 -mu;0 0 1; 0 0 -1];
-    B_ineq = [0; 0; 0; 0; 1; -1];
-    A_ineq_i = kron(eye(num_feet_contact),A_ineq);
-    B_ineq_i = repmat(B_ineq,1,num_feet_contact);
-
-    
+    y = reshape(X_des,[],1);
+    F = 2*B_hat'*Q_hat*(A_hat*X_cur-y);
 end

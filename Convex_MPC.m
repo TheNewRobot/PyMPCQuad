@@ -19,10 +19,11 @@ p = get_params(gait);
 p.playSpeed = 1;
 p.flag_movie = 1;       % 1 - make movie
 use_qpSWIFT = 0;        % 0 - quadprog, 1 - qpSWIFT (external)
+p.predHorizon = 16;
 N = p.predHorizon;
 
 dt_sim = p.simTimeStep;
-SimTimeDuration = 5;  % [sec]
+SimTimeDuration = 2;  % [sec]
 MAX_ITER = floor(SimTimeDuration/p.simTimeStep);
 
 % desired trajectory
@@ -74,45 +75,52 @@ for ii = 1:MAX_ITER
 
     % future idx for feet in contact for horizon 
     idx = reshape(idx,4,p.predHorizon);
-    
+    num_feet_contact = length(nonzeros(idx(:,1)));
 
     %% --- MPC ----
    
     % form QP
-    [F, G, A_ineq, b_ineq] = get_QP(Xd,Ud,idx,N,p);
-% 
-%     % solve QP using quadprog
-%     b_ineq = b_ineq + b_ineq_x0;
-%     f = X'*F';
-%     [zval] = quadprog(G,f,Aineq,bineq,Aeq,beq,[],[]);
-% 
-%     %get the foot forces value for first time step and repeat
-%     Ut = zval(1:12);
-%     
-%     % logging
-%     i_hor = 1;
-%     Ut_ref = [Ut_ref, Ut];
-%     Ud_ref = [Ud_ref, Ud(:,i_hor)];     
-%     %% --- simulate without any external disturbances ---
-%     [t,X] = ode45(@(t,X)dynamics_SRB(t,X,Ut,Xd,0,p),[tstart,tend],Xt);
-%     
-%     
-%     %% --- update ---
-%     Xt = X(end,:)';
-%     tstart = tend;
-%     tend = tstart + dt_sim;
-%     
-%     %% --- log ---  
-%     lent = length(t(2:end));
-%     tout = [tout;t(2:end)];
-%     Xout = [Xout;X(2:end,:)];
-%     Uout = [Uout;repmat(Ut',[lent,1])];
-%     Xdout = [Xdout;repmat(Xd(:,1)',[lent,1])];
-%     Udout = [Udout;repmat(Ud(:,1)',[lent,1])];
-%     Uext = [Uext;repmat(u_ext',[lent,1])];
-%     FSMout = [FSMout;repmat(FSM',[lent,1])];
-%     
-%     waitbar(ii/MAX_ITER,h_waitbar,'Calculating...');
+    [f, G, A, b] = get_QP(Xt,Xd,Ud,idx,N,p);
+ 
+    % solve QP using quadprog     
+    [zval] = quadprog(G,f,A,b,[],[],[],[]);
+
+    % get the foot forces value for first time step and repeat
+    if num_feet_contact == 2
+        Ut = [[0 0 0]'; zval(1:3);[0 0 0]'; zval(4:6)];
+    else
+        Ut = zval(1:12);
+    end
+   
+    % logging
+    i_hor = 1;
+    Ut_ref = [Ut_ref, Ut];
+    Ud_ref = [Ud_ref, Ud(:,i_hor)];     
+    %% --- external disturbance ---
+    [u_ext,p_ext] = fcn_get_disturbance(tstart,p);
+    p.p_ext = p_ext;        % position of external force
+    u_ext = u_ext;
+    
+    %% --- simulate without any external disturbances ---
+    [t,X] = ode45(@(t,X)dynamics_SRB(t,X,Ut,Xd,0*u_ext,p),[tstart,tend],Xt);
+    
+    
+    %% --- update ---
+    Xt = X(end,:)';
+    tstart = tend;
+    tend = tstart + dt_sim;
+    
+    %% --- log ---  
+    lent = length(t(2:end));
+    tout = [tout;t(2:end)];
+    Xout = [Xout;X(2:end,:)];
+    Uout = [Uout;repmat(Ut',[lent,1])];
+    Xdout = [Xdout;repmat(Xd(:,1)',[lent,1])];
+    Udout = [Udout;repmat(Ud(:,1)',[lent,1])];
+    Uext = [Uext;repmat(u_ext',[lent,1])];
+    FSMout = [FSMout;repmat(FSM',[lent,1])];
+    
+    waitbar(ii/MAX_ITER,h_waitbar,'Calculating...');
 end
 close(h_waitbar)
 fprintf('Calculation Complete!\n')
