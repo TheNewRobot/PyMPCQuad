@@ -79,7 +79,7 @@ for ii = 1:MAX_ITER
     %% --- external disturbance ---
     [u_ext,p_ext] = fcn_get_disturbance(tstart,p);
     p.p_ext = p_ext;        % position of external force
-    u_ext = u_ext;
+    u_ext = 0*u_ext;        % Change external
     
     %% --- simulate without any external disturbances ---
     [t,X] = ode45(@(t,X)dynamics_SRB(t,X,Ut,Xd,u_ext,p),[tstart,tend],Xt);

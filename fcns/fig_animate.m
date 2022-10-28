@@ -57,18 +57,20 @@ for ii = 1:p.playSpeed:nt
     pcom = X(ii,1:3)';
     h_main = subplot(N,M,[1,2,4,5]);
     hold on; grid on;axis square;axis equal;
-    h_main.XLim = [pcom(1)-0.5 pcom(1)+0.5];
-    h_main.YLim = [pcom(2)-0.5 pcom(2)+0.5];
+    %h_main.XLim = [pcom(1)-0.5 pcom(1)+0.5];
+    %h_main.YLim = [pcom(2)-0.5 pcom(2)+0.5];
+    h_main.XLim = [-1 4]; % Change xlim
+    h_main.YLim = [-3 3]; % Change ylim
     h_main.ZLim = [-0.2 0.6];
     
-    viewPt = [0.2,0.5,0.2];
+    viewPt = [-0.0,-0.25,0.1]; % Change view
     view(viewPt);
     
     % plot robot & GRF
     % real
     fig_plot_robot(X(ii,:)',U(ii,:)',Ue(ii,:)',p)
     % desired
-    fig_plot_robot_d(Xd(ii,:)',0*Ud(ii,:)',p)
+    %fig_plot_robot_d(Xd(ii,:)',0*Ud(ii,:)',p)
     
     % text
     txt_time = ['t = ',num2str(t(ii),2),'s'];

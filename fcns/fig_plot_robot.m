@@ -110,17 +110,19 @@ fill3(chain1(1,:),chain1(2,:),chain1(3,:),body_color,...
       chain6(1,:),chain6(2,:),chain6(3,:),body_color)
 
 % legs
+% Change leg size
 plot3(chain_leg1(1,:),chain_leg1(2,:),chain_leg1(3,:),...
       chain_leg2(1,:),chain_leg2(2,:),chain_leg2(3,:),...
       chain_leg3(1,:),chain_leg3(2,:),chain_leg3(3,:),...
       chain_leg4(1,:),chain_leg4(2,:),chain_leg4(3,:),...
-      'linewidth',3,'color',leg_color)
+      'linewidth',1.5,'color',leg_color)
 
 % feet
-plot3(pf34(1,1),pf34(2,1),pf34(3,1),'o','MarkerFaceColor',leg_color,'MarkerEdgeColor',leg_color)
-plot3(pf34(1,2),pf34(2,2),pf34(3,2),'o','MarkerFaceColor',leg_color,'MarkerEdgeColor',leg_color)
-plot3(pf34(1,3),pf34(2,3),pf34(3,3),'o','MarkerFaceColor',leg_color,'MarkerEdgeColor',leg_color)
-plot3(pf34(1,4),pf34(2,4),pf34(3,4),'o','MarkerFaceColor',leg_color,'MarkerEdgeColor',leg_color)
+% Change feet size
+plot3(pf34(1,1),pf34(2,1),pf34(3,1),'o','MarkerFaceColor',leg_color,'MarkerEdgeColor',leg_color, 'MarkerSize', 2.5)
+plot3(pf34(1,2),pf34(2,2),pf34(3,2),'o','MarkerFaceColor',leg_color,'MarkerEdgeColor',leg_color, 'MarkerSize', 2.5)
+plot3(pf34(1,3),pf34(2,3),pf34(3,3),'o','MarkerFaceColor',leg_color,'MarkerEdgeColor',leg_color, 'MarkerSize', 2.5)
+plot3(pf34(1,4),pf34(2,4),pf34(3,4),'o','MarkerFaceColor',leg_color,'MarkerEdgeColor',leg_color, 'MarkerSize', 2.5)
 
 % GRF
 scale = 1e-2;
@@ -137,18 +139,22 @@ plot3(chain_Ue(1,:),chain_Ue(2,:),chain_Ue(3,:),'c','linewidth',1.5)
 % ground
 Rground = p.Rground;
 
-goffset = 0.5;      % ground offset
+goffset = 3;      % ground offset | Change ground size
 chain0 = repmat([pcom(1);pcom(2);0],[1,4]) +...
         Rground * goffset * [[-1 1 0]',[1 1 0]',[1 -1 0]',[-1 -1 0]'];
 
-chain0 = [[pcom(1)-goffset pcom(2)+goffset 0]',...
-          [pcom(1)+goffset pcom(2)+goffset 0]',...
-          [pcom(1)+goffset pcom(2)-goffset 0]',...
-          [pcom(1)-goffset pcom(2)-goffset 0]'];
+% chain0 = [[pcom(1)-goffset pcom(2)+goffset 0]',...
+%           [pcom(1)+goffset pcom(2)+goffset 0]',...
+%           [pcom(1)+goffset pcom(2)-goffset 0]',...
+%           [pcom(1)-goffset pcom(2)-goffset 0]'];
+chain0 = [[-goffset goffset 0]',...
+          [goffset goffset 0]',...
+          [goffset -goffset 0]',...
+          [-goffset -goffset 0]'];          % Change ground location
 
-    if p.gait ~= -2
-        fill3(chain0(1,:),chain0(2,:),chain0(3,:),ground_color)
-    end
+if p.gait ~= -2
+    fill3(chain0(1,:),chain0(2,:),chain0(3,:),ground_color)
+end
 
 end
 
