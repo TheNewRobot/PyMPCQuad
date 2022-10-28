@@ -23,7 +23,7 @@ function [F, G, A_ineq, b_ineq] = get_QP(Xt,Xd,Ud,idx,N,params)
     %% get system matrices
     % define friction constraints
     mu = params.mu;
-    g = 9.81;
+    g = -9.8;
     dT = 0.2;
 
     A = get_A(Xd);
@@ -45,7 +45,7 @@ function [F, G, A_ineq, b_ineq] = get_QP(Xt,Xd,Ud,idx,N,params)
     X_des = [xd;vd];
 
     %% define costs
-    P = 1e5*eye(size(A)); % terminal cost
+    P = 1e6*eye(size(A)); % terminal cost
     Q_i = 1e5*eye(size(A)); % stage cost
     
     %% Build QP Matrices
@@ -74,19 +74,19 @@ function [F, G, A_ineq, b_ineq] = get_QP(Xt,Xd,Ud,idx,N,params)
 
         a = [zeros(i*n,n); eye(n); A_hat(1:end-i*n,:)];
         B_hat = [B_hat, a(n+1:end,:)*B_i];
-        R_i = 0.01*eye(size(B_i,2));
+        R_i = 1e-6*eye(size(B_i,2));
         R_hat = blkdiag(R_hat, R_i);
         
         %% Augmented inequality constraint
         % get number of feet in contact
         num_feet_contact = length(nonzeros(idx(:,i)));
         
-        A_ineq_i = [ 1  0 -mu;...
-                    -1  0 -mu;...
+        A_ineq_i = [-1  0 -mu;...
+                     1  0 -mu;...
+                     0  -1 -mu;...
                      0  1 -mu;...
-                     0 -1 -mu;...
-                     0  0  1;...
-                     0  0 -1];
+                     0  0  -1;...
+                     0  0  1];
         A_ineq_i = kron(eye(num_feet_contact),A_ineq_i);
         A_ineq = blkdiag(A_ineq, A_ineq_i);
         % set max values of fi_z
@@ -94,7 +94,7 @@ function [F, G, A_ineq, b_ineq] = get_QP(Xt,Xd,Ud,idx,N,params)
         fi_z_lb = 0.5 * max(Fzd);
         fi_z_ub = 1.5 * max(Fzd);
         
-        b_ineq_i = [0; 0; 0; 0; fi_z_ub; -fi_z_lb];
+        b_ineq_i = [0; 0; 0; 0; -fi_z_lb; fi_z_ub];
         b_ineq_i = repmat(b_ineq_i,num_feet_contact,1);
         b_ineq = [b_ineq; b_ineq_i];
 

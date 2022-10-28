@@ -19,11 +19,11 @@ p = get_params(gait);
 p.playSpeed = 1;
 p.flag_movie = 1;       % 1 - make movie
 use_qpSWIFT = 0;        % 0 - quadprog, 1 - qpSWIFT (external)
-p.predHorizon = 2;
+p.predHorizon = 16;
 N = p.predHorizon;
 
 dt_sim = p.simTimeStep;
-SimTimeDuration = 2;  % [sec]
+SimTimeDuration = 1;  % [sec]
 MAX_ITER = floor(SimTimeDuration/p.simTimeStep);
 
 % desired trajectory
@@ -83,13 +83,15 @@ for ii = 1:MAX_ITER
     [f, G, A, b] = get_QP(Xt,Xd,Ud,idx,N,p);
  
     % solve QP using quadprog     
-    [zval] = quadprog(G,f,A,b,[],[],[],[]);
+    [zval] = quadprog(G,f,[],[],[],[],[],[]);
 
     % get the foot forces value for first time step and repeat
     if num_feet_contact == 2
-        Ut = [[0 0 0]'; zval(1:3);[0 0 0]'; zval(4:6)];
+        num_feet_contact
+        Ut = [[0 0 0]'; zval(1:3);[0 0 0]'; zval(4:6)]
     else
-        Ut = zval(1:12);
+        num_feet_contact
+        Ut = zval(1:12)
     end
    
     % logging
