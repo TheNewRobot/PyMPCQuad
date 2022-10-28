@@ -20,6 +20,7 @@ R_psi = [cos(psi),  sin(psi),   0;...
 
 %% inertia matrix in world frame
 I_w = R_psi*J*R_psi';
+I_inv = I_w^-1;
 
 %% footstep locations r in body frame
 pc = reshape(Xt(1:3),[3,1]);
@@ -29,14 +30,13 @@ r1_hat = hatMap(r34(:,1));
 r2_hat = hatMap(r34(:,2));
 r3_hat = hatMap(r34(:,3));
 r4_hat = hatMap(r34(:,4));
-r_hat = [r1_hat;r2_hat;r3_hat;r4_hat];
 
 %% continuous time LTV system dynamics
 % states = [p p_dot theta omega gravity]
 
 % variable size B_psi
 B_feet =  [I_inv*r1_hat,  I_inv*r2_hat,   I_inv*r3_hat ,  I_inv*r4_hat];
-B_feet = B_feet.*kron(idx(:,horizon_i)',ones(3,3));
+B_feet = B_feet.*kron(idx(:,horizon_i)',ones(size(B_feet)));
 B_feet(:,all(~B_feet,1)) = []; % make zero columns as null
 
 zero_B = zeros(size(B_feet));

@@ -80,4 +80,6 @@ function [F, G, A_ineq, b_ineq] = get_QP(Xd,Ud,idx,N,params)
     B_ineq = [0; 0; 0; 0; 1; -1];
     A_ineq_i = kron(eye(num_feet_contact),A_ineq);
     B_ineq_i = repmat(B_ineq,1,num_feet_contact);
+
+    
 end

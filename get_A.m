@@ -14,7 +14,6 @@ psi = mean(euler_angles(3,:));
 % states = [p p_dot theta omega gravity]
 zero_A = zeros(3,3);
 one_A = eye(3,3);
-I_inv = I_w^-1;
 
 A_psi = [zero_A,  zero_A,   zero_A,   one_A;...
          zero_A,  zero_A,   zero_A,   zero_A;...
@@ -26,3 +25,4 @@ A_aug = [A_psi,                 zeros(size(A_psi,1),1);...
 
 dT = 0.1;  
 A = A_aug.*dT + eye(size(A_aug));
+end
