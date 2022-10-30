@@ -21,7 +21,7 @@ p.flag_movie = 1;       % 1 - make movie
 use_qpSWIFT = 0;        % 0 - quadprog, 1 - qpSWIFT (external)
 
 dt_sim = p.simTimeStep;
-SimTimeDuration = 5;  % [sec]
+SimTimeDuration = 2;  % [sec]
 MAX_ITER = floor(SimTimeDuration/p.simTimeStep);
 
 % desired trajectory

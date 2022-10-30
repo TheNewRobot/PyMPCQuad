@@ -19,7 +19,5 @@ A_psi = [zero_A,  zero_A,   zero_A,   one_A;...
 g_aug = [zeros(3,1); [0;0;1]; zeros(3,1); zeros(3,1)];
 A_aug = [A_psi,                 g_aug;...
         zeros(1,size(A_psi,2)), 0];
-%% discrete time dynamics A
-%dT = 0.1;  
-%A = A_aug.*dT + eye(size(A_aug));
+
 end

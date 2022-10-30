@@ -16,14 +16,18 @@ addpath fcns fcns_MPC
 % 0-trot; 1-bound; 2-pacing 3-gallop; 4-trot run; 5-crawl
 gait = 0;
 p = get_params(gait);
-p.playSpeed = 1;
+p.playSpeed = 5;
 p.flag_movie = 1;       % 1 - make movie
 use_qpSWIFT = 0;        % 0 - quadprog, 1 - qpSWIFT (external)
-p.predHorizon = 16;
+
+% MPC parameters
+p.predHorizon = 4;
 N = p.predHorizon;
+p.Tmpc = 0.02;
+p.simTimeStep = 1/200;
 
 dt_sim = p.simTimeStep;
-SimTimeDuration = 1;  % [sec]
+SimTimeDuration = 5;  % [sec]
 MAX_ITER = floor(SimTimeDuration/p.simTimeStep);
 
 % desired trajectory
@@ -79,20 +83,31 @@ for ii = 1:MAX_ITER
 
     %% --- MPC ----
    
-    % form QP
+    %form QP
     [f, G, A, b] = get_QP(Xt,Xd,Ud,idx,N,p);
- 
     % solve QP using quadprog     
-    [zval] = quadprog(G,f,[],[],[],[],[],[]);
+    [zval] = quadprog(G,f,A,b,[],[],[],[]);
 
     % get the foot forces value for first time step and repeat
-    if num_feet_contact == 2
-        num_feet_contact
-        Ut = [[0 0 0]'; zval(1:3);[0 0 0]'; zval(4:6)]
-    else
-        num_feet_contact
-        Ut = zval(1:12)
+    contacts = 1;
+    contact_seq = idx(:,1);
+    for i=1:4
+        if(contact_seq(i)==1)
+            Ut((i-1)*3+1:i*3) = zval((contacts-1)*3+1:contacts*3).*[1;1;1];
+            contacts = contacts + 1;
+        else
+            Ut((i-1)*3+1:i*3) = [0;0;0];
+        end
     end
+
+
+    %form QP fixed
+    %[f, G, A, b, Aeq, beq] = get_QP_fixed(Xt,Xd,Ud,stance_feet,N,p);
+    % solve QP using quadprog fixed 
+    %[zval] = quadprog(G,f,A,b,Aeq,beq,[],[]);
+
+    %[zval] = quadprog(G,f,[],[],[],[],[],[]);
+    %Ut = zval(1:12);
    
     % logging
     i_hor = 1;
@@ -101,10 +116,10 @@ for ii = 1:MAX_ITER
     %% --- external disturbance ---
     [u_ext,p_ext] = fcn_get_disturbance(tstart,p);
     p.p_ext = p_ext;        % position of external force
-    u_ext = u_ext;
+    u_ext = 0*u_ext;
     
     %% --- simulate without any external disturbances ---
-    [t,X] = ode45(@(t,X)dynamics_SRB(t,X,Ut,Xd,0*u_ext,p),[tstart,tend],Xt);
+    [t,X] = ode45(@(t,X)dynamics_SRB(t,X,Ut,Xd,u_ext,p),[tstart,tend],Xt);
     
     
     %% --- update ---

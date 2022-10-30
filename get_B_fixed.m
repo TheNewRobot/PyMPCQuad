@@ -1,4 +1,4 @@
-function B_aug = get_B(Xt,Xd,idx,horizon_i,p)
+function B_aug = get_B_fixed(Xt,Xd,p)
 % function to get time varying B matrix over a horizon
 % Inputs
 % Xt (current states)
@@ -26,23 +26,13 @@ r2_hat = hatMap(r34(:,2));
 r3_hat = hatMap(r34(:,3));
 r4_hat = hatMap(r34(:,4));
 
-num_feet_contact = length(nonzeros(idx(:,horizon_i)));
-
 %% continuous time LTV system dynamics B of varying size
 % states = [p p_dot theta omega gravity]
 
 B_feet =  [I_inv*r1_hat,  I_inv*r2_hat,   I_inv*r3_hat ,  I_inv*r4_hat];
-rows = size(B_feet,1);
-
-% map each value in idx size(4,1) to B_feet size(3,12)
-% maps each contanct feet to corresponding B matrix column entries
-B_feet = B_feet.*kron(idx(:,horizon_i)',ones(rows,rows));
-
-% set remove all zero columns
-B_feet(:,all(~B_feet,1)) = [];
-
 zero_B = zeros(size(B_feet));
-one_B = repmat(eye(3),1,num_feet_contact);
+one_B = repmat(eye(3),1,4);
+
 B_psi = [zero_B; one_B./mass; zero_B; B_feet];
 
 B_aug = [B_psi; zeros(1,size(B_psi,2))];
