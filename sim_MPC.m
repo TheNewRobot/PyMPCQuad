@@ -114,30 +114,19 @@ for k=1:N
 end
 
 % set up NLP problem
-%qp_prob = struct('f', obj, 'x', U_i, 'g', g);
-nlp_prob = struct('f', obj, 'x', U_i, 'g', g);
+qp_prob = struct('f', obj, 'x', U_i, 'g', g);
+%nlp_prob = struct('f', obj, 'x', U_i, 'g', g);
 
-% set solver options
-% opts = struct;
-% opts.qpoases.max_iter = 100;
-% opts.qpoases.print_level = 0;
-% opts.print_time = 0;
-% opts.qpoases.acceptable_tol =1e-8;
-% opts.qpoases.acceptable_obj_change_tol = 1e-6;
+% set solver options (check qpoases user manual)
 opts = struct;
-opts.ipopt.max_iter = 100;
-opts.ipopt.print_level =0;%0,3
-opts.print_time = 0;
-opts.ipopt.acceptable_tol =1e-8;
-opts.ipopt.acceptable_obj_change_tol = 1e-6;
+opts.printLevel = 'none';
 
 % set up solver
-solver = nlpsol('solver', 'ipopt', nlp_prob,opts);
+solver = qpsol('solver', 'qpoases', qp_prob, opts);
 
 % find optimal solution
 sol = solver('lbg', args.lbg, 'ubg', args.ubg);    
-%sol = solver('lbx', args.lbx, 'ubx', args.ubx,...
-%             'lbg', args.lbg, 'ubg', args.ubg);
+
 
 num_feet_contact = length(nonzeros(idx(:,1)));
 zval = full(sol.x);

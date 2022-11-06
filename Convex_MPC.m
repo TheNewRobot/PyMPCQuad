@@ -17,16 +17,17 @@ addpath fcns fcns_MPC
 gait = 5;
 p = get_params(gait);
 p.playSpeed = 5;
-p.flag_movie = 1;       % 1 - make movie
-use_qpSWIFT = 0;        % 0 - quadprog, 1 - qpSWIFT (external)
+p.flag_movie = 1;      % 1 - make movie
+use_Casadi = 0;        % 0 - build QP matrices, 1 -casadi with qpoases 
 
 % MPC parameters
 p.predHorizon = 10;
 N = p.predHorizon;
 p.Tmpc = 0.02;
 p.simTimeStep = 1/200;
-
 dt_sim = p.simTimeStep;
+
+% simulation time
 SimTimeDuration = 2;  % [sec]
 MAX_ITER = floor(SimTimeDuration/p.simTimeStep);
 
@@ -79,18 +80,22 @@ for ii = 1:MAX_ITER
     stance_feet = ones(3,4*N).*idx;
 
     % future idx for feet in contact for horizon 
-    idx = reshape(idx,4,p.predHorizon)
+    idx = reshape(idx,4,p.predHorizon);
     num_feet_contact = length(nonzeros(idx(:,1)));
 
     %% --- MPC ----
    
-    %form QP using explicit matrices
-    %[f, G, A, b] = get_QP(Xt,Xd,Ud,idx,N,p);
-    % solve QP using quadprog     
-    %[zval] = quadprog(G,f,A,b,[],[],[],[]);
-
-    % solve QP using casadi
-    [zval] = sim_MPC(Xt,Xd,Ud,idx,N,p);
+    if use_Casadi
+        % solve QP using qpoases through casadi
+        % uses single shooting method
+        [zval] = sim_MPC(Xt,Xd,Ud,idx,N,p);
+        
+    else
+        %form QP using explicit matrices
+        [f, G, A, b] = get_QP(Xt,Xd,Ud,idx,N,p);
+        % solve QP using quadprog     
+        [zval] = quadprog(G,f,A,b,[],[],[],[]);
+    end
 
     % get the foot forces value for first time step and repeat
     contacts = 1;
@@ -103,14 +108,6 @@ for ii = 1:MAX_ITER
             Ut((i-1)*3+1:i*3) = [0;0;0];
         end
     end
-
-    %form QP fixed
-    %[f, G, A, b, Aeq, beq] = get_QP_fixed(Xt,Xd,Ud,stance_feet,N,p);
-    % solve QP using quadprog fixed 
-    %[zval] = quadprog(G,f,A,b,Aeq,beq,[],[]);
-
-    %[zval] = quadprog(G,f,[],[],[],[],[],[]);
-    %Ut = zval(1:12);
    
     % logging
     i_hor = 1;
