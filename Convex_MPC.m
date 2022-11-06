@@ -14,14 +14,14 @@ addpath fcns fcns_MPC
 %% --- parameters ---
 % ---- gait ----
 % 0-trot; 1-bound; 2-pacing 3-gallop; 4-trot run; 5-crawl
-gait = 5;
+gait = 0;
 p = get_params(gait);
 p.playSpeed = 5;
 p.flag_movie = 1;      % 1 - make movie
-use_Casadi = 0;        % 0 - build QP matrices, 1 -casadi with qpoases 
+use_Casadi = 1;        % 0 - build QP matrices, 1 -casadi with qpoases 
 
 % MPC parameters
-p.predHorizon = 10;
+p.predHorizon = 4;
 N = p.predHorizon;
 p.Tmpc = 0.02;
 p.simTimeStep = 1/200;
@@ -87,9 +87,9 @@ for ii = 1:MAX_ITER
    
     if use_Casadi
         % solve QP using qpoases through casadi
-        % uses single shooting method
-        [zval] = sim_MPC(Xt,Xd,Ud,idx,N,p);
-        
+        % 1 - single shooting, 0 - multi shooting 
+        single_shoot = 0;
+        [zval] = sim_MPC(Xt,Xd,Ud,idx,N,p,single_shoot);       
     else
         %form QP using explicit matrices
         [f, G, A, b] = get_QP(Xt,Xd,Ud,idx,N,p);
