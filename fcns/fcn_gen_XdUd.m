@@ -22,21 +22,41 @@ for ii = 1:lent
             if t(ii) < (vel_d(jj) / acc_d)
                 dpc_d(jj) = acc_d * t(ii);
                 pc_d(jj) = 1/2 * acc_d * t(ii)^2;
+                
             else
                 dpc_d(jj) = vel_d(jj);
-                pc_d(jj) = vel_d(jj) * t(ii) - 1/2 * vel_d(jj) * vel_d(jj)/acc_d;
+                pc_d(jj) = vel_d(jj) * t(ii) - 1/2 * vel_d(jj) * vel_d(jj)/acc_d;%          
             end
         end
+
+        %%%%%%%%%% angular motion default %%%%%%%%%%%%%
+%         if isempty(Xt)
+%             ea_d = [0;0;0];
+%         else
+%             ea_d = [0;0;yaw_d];
+%         end
+%         vR_d = reshape(expm(hatMap(ea_d)),[9,1]);
+%         wb_d = [0;0;0];
+        
         %%%%%%%%%% angular motion %%%%%%%%%%%%%
+        ang_acc_d = [0;0;0.5];
+        ea_d = [0;0;0];
+        wb_d = [0;0;0];
         if isempty(Xt)
             ea_d = [0;0;0];
+            wb_d = [0;0;0];
         else
-            ea_d = [0;0;yaw_d];
+            wb_d(3) = ang_acc_d(3) * t(ii);
+            ea_d(3) = 1/2 * ang_acc_d(3) * t(ii)^2;
+        end
+
+        if  ea_d(3)>=yaw_d
+            wb_d(3) = 0;
+            ea_d(3) = yaw_d;
         end
         vR_d = reshape(expm(hatMap(ea_d)),[9,1]);
-        wb_d = [0;0;0];
-
     end
+
     pfd = reshape(Rground * p.pf34,[12,1]);
     Xd(:,ii) = [pc_d;dpc_d;vR_d;wb_d;pfd];
     

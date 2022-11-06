@@ -14,26 +14,27 @@ addpath fcns fcns_MPC
 %% --- parameters ---
 % ---- gait ----
 % 0-trot; 1-bound; 2-pacing 3-gallop; 4-trot run; 5-crawl
-gait = 0;
+gait = 5;
 p = get_params(gait);
 p.playSpeed = 5;
 p.flag_movie = 1;       % 1 - make movie
 use_qpSWIFT = 0;        % 0 - quadprog, 1 - qpSWIFT (external)
 
 % MPC parameters
-p.predHorizon = 4;
+p.predHorizon = 10;
 N = p.predHorizon;
 p.Tmpc = 0.02;
 p.simTimeStep = 1/200;
 
 dt_sim = p.simTimeStep;
-SimTimeDuration = 5;  % [sec]
+SimTimeDuration = 2;  % [sec]
 MAX_ITER = floor(SimTimeDuration/p.simTimeStep);
 
 % desired trajectory
-p.acc_d = 1;
+p.acc_d = 0.5;
 p.vel_d = [0.5;0];
-p.yaw_d = 0;
+p.yaw_d = pi/3;
+
 
 %% Model Predictive Control
 % --- initial condition ---
@@ -78,15 +79,18 @@ for ii = 1:MAX_ITER
     stance_feet = ones(3,4*N).*idx;
 
     % future idx for feet in contact for horizon 
-    idx = reshape(idx,4,p.predHorizon);
+    idx = reshape(idx,4,p.predHorizon)
     num_feet_contact = length(nonzeros(idx(:,1)));
 
     %% --- MPC ----
    
-    %form QP
-    [f, G, A, b] = get_QP(Xt,Xd,Ud,idx,N,p);
+    %form QP using explicit matrices
+    %[f, G, A, b] = get_QP(Xt,Xd,Ud,idx,N,p);
     % solve QP using quadprog     
-    [zval] = quadprog(G,f,A,b,[],[],[],[]);
+    %[zval] = quadprog(G,f,A,b,[],[],[],[]);
+
+    % solve QP using casadi
+    [zval] = sim_MPC(Xt,Xd,Ud,idx,N,p);
 
     % get the foot forces value for first time step and repeat
     contacts = 1;
@@ -99,7 +103,6 @@ for ii = 1:MAX_ITER
             Ut((i-1)*3+1:i*3) = [0;0;0];
         end
     end
-
 
     %form QP fixed
     %[f, G, A, b, Aeq, beq] = get_QP_fixed(Xt,Xd,Ud,stance_feet,N,p);
@@ -145,7 +148,7 @@ toc
 
 %% Animation
 [t,EA,EAd] = fig_animate(tout,Xout,Uout,Xdout,Udout,Uext,p);
-
+%[t,EA,EAd] = fig_animate_default(tout,Xout,Uout,Xdout,Udout,Uext,p);
 %% Robot path
 figure()
 plot3(Xout(:,1), Xout(:,2), Xout(:,3)); grid on

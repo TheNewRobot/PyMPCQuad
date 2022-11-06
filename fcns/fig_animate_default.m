@@ -54,8 +54,6 @@ for i = 1:length(X)
     thetad = [thetad; veeMap(logm(Rd))']; 
 end
 
-
-
 %%%%%% subfigure handles %%%%%%%
 h_x = subplot(N,M,3);
 h_dx = subplot(N,M,6);
@@ -68,20 +66,18 @@ for ii = 1:p.playSpeed:nt
     pcom = X(ii,1:3)';
     h_main = subplot(N,M,[1,2,4,5]);
     hold on; grid on;axis square;axis equal;
-    %h_main.XLim = [pcom(1)-0.5 pcom(1)+0.5];
-    %h_main.YLim = [pcom(2)-0.5 pcom(2)+0.5];
-    h_main.XLim = [-1 4]; % Change xlim
-    h_main.YLim = [-3 3]; % Change ylim
+    h_main.XLim = [pcom(1)-0.5 pcom(1)+0.5];
+    h_main.YLim = [pcom(2)-0.5 pcom(2)+0.5];
     h_main.ZLim = [-0.2 0.6];
     
-    viewPt = [-0.0,-0.25,0.1]; % Change view
+    viewPt = [0.2,0.5,0.2];
     view(viewPt);
     
     % plot robot & GRF
     % real
     fig_plot_robot(X(ii,:)',U(ii,:)',Ue(ii,:)',p)
     % desired
-    %fig_plot_robot_d(Xd(ii,:)',0*Ud(ii,:)',p)
+    fig_plot_robot_d(Xd(ii,:)',0*Ud(ii,:)',p)
     
     % text
     txt_time = ['t = ',num2str(t(ii),2),'s'];
@@ -92,7 +88,7 @@ for ii = 1:p.playSpeed:nt
     text(pcom(1),pcom(2),0.45,txt_v)
 
     %% states
-%  %%%%%%%%% angular position %%%%%%%%%
+      %%%%%%%%% angular position %%%%%%%%%
     plot(h_x,t(1:ii),theta(1:ii,1),'r',...
          t(1:ii),theta(1:ii,2),'g',...
          t(1:ii),theta(1:ii,3),'b',...
@@ -102,9 +98,9 @@ for ii = 1:p.playSpeed:nt
     h_x.XLim = [t(1) t(end)];
     legend(h_x,'r','p','y', 'Location', 'northeastoutside');
     set( get(h_x,'Title'), 'String', 'Angluar Position [rad]');
-%     %set( get(h_x,'legend'), 'String', 'x_pos','y_pos','z_pos');
+    %set( get(h_x,'legend'), 'String', 'x_pos','y_pos','z_pos');
+        
 %     
-    
     %%%%%%%%% position %%%%%%%%%
 %     plot(h_x,t(1:ii),X(1:ii,1),'r',...
 %          t(1:ii),X(1:ii,2),'g',...
@@ -115,7 +111,7 @@ for ii = 1:p.playSpeed:nt
 %     h_x.XLim = [t(1) t(end)];
 %     legend(h_x,'x','y','z', 'Location', 'northeastoutside');
 %     set( get(h_x,'Title'), 'String', 'Position [m]');
-    %set( get(h_x,'legend'), 'String', 'x_pos','y_pos','z_pos');
+%     %set( get(h_x,'legend'), 'String', 'x_pos','y_pos','z_pos');
 
     %%%%%%%%% velocity %%%%%%%%%
     plot(h_dx,t(1:ii),X(1:ii,4),'r',...

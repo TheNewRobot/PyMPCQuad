@@ -29,7 +29,9 @@ r4_hat = hatMap(r34(:,4));
 num_feet_contact = length(nonzeros(idx(:,horizon_i)));
 
 %% continuous time LTV system dynamics B of varying size
-% states = [p p_dot theta omega gravity]
+% states = [p p_dot theta omega gravity], all states are in world frame
+% note here MPC uses w in world frame while dynamics_SRB.m uses w in body
+% frame
 
 B_feet =  [I_inv*r1_hat,  I_inv*r2_hat,   I_inv*r3_hat ,  I_inv*r4_hat];
 rows = size(B_feet,1);
