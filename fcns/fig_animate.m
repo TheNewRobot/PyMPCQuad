@@ -70,12 +70,14 @@ for ii = 1:p.playSpeed:nt
     hold on; grid on;axis square;axis equal;
     %h_main.XLim = [pcom(1)-0.5 pcom(1)+0.5];
     %h_main.YLim = [pcom(2)-0.5 pcom(2)+0.5];
-    h_main.XLim = [-1 4]; % Change xlim
-    h_main.YLim = [-3 3]; % Change ylim
+    h_main.XLim = [-0.5 2]; % Change xlim
+    h_main.YLim = [-1 2]; % Change ylim
     h_main.ZLim = [-0.2 0.6];
     
-    viewPt = [-0.0,-0.25,0.1]; % Change view
+    %viewPt = [-0.0,-0.25,0.1]; % Change view
+    viewPt = [-0.2,-0.5,0.2];
     view(viewPt);
+   
     
     % plot robot & GRF
     % real

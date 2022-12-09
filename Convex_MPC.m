@@ -21,20 +21,23 @@ p.flag_movie = 1;      % 1 - make movie
 use_Casadi = 1;        % 0 - build QP matrices, 1 -casadi with qpoases 
 
 % MPC parameters
-p.predHorizon = 4;
+p.predHorizon = 15;
 N = p.predHorizon;
-p.Tmpc = 0.02;
+p.Tmpc = 1/50;
 p.simTimeStep = 1/200;
 dt_sim = p.simTimeStep;
 
 % simulation time
-SimTimeDuration = 2;  % [sec]
+SimTimeDuration = 5;  % [sec]
 MAX_ITER = floor(SimTimeDuration/p.simTimeStep);
 
 % desired trajectory
+p.yaw_d = pi/4;
 p.acc_d = 0.5;
-p.vel_d = [0.5;0];
-p.yaw_d = pi/3;
+p.vel_d = [0.5*cos(p.yaw_d);0.5*sin(p.yaw_d)];
+
+p.wb_d = [0;0;0];
+p.ang_acc_d = [0;0;0.5];
 
 
 %% Model Predictive Control
@@ -88,7 +91,7 @@ for ii = 1:MAX_ITER
     if use_Casadi
         % solve QP using qpoases through casadi
         % 1 - single shooting, 0 - multi shooting 
-        single_shoot = 0;
+        single_shoot = 1;
         [zval] = sim_MPC(Xt,Xd,Ud,idx,N,p,single_shoot);       
     else
         %form QP using explicit matrices
@@ -146,122 +149,17 @@ toc
 %% Animation
 [t,EA,EAd] = fig_animate(tout,Xout,Uout,Xdout,Udout,Uext,p);
 %[t,EA,EAd] = fig_animate_default(tout,Xout,Uout,Xdout,Udout,Uext,p);
-%% Robot path
-figure()
-plot3(Xout(:,1), Xout(:,2), Xout(:,3)); grid on
-%plot(Xdout(:,1), Xdout(:,2)); grid on
-xlabel('x(t)')
-ylabel('y(t)')
-zlabel('z(t)')
-
-%% Z direction foot forces
-figure()
-subplot(2,2,1)
-plot(Ud_ref(3,:),'--'); hold on;
-plot(Ut_ref(3,:))
-title('Z direction foot force of front left foot')
-xlabel('time (ms)')
-ylabel('force (N)')
-legend('reference','MPC')
-hold off
-
-subplot(2,2,2)
-plot(Ud_ref(6,:),'--'); hold on;
-plot(Ut_ref(6,:))
-title('Z direction foot force of front left foot')
-xlabel('time (ms)')
-ylabel('force (N)')
-legend('reference','MPC')
-hold off
-
-subplot(2,2,3)
-plot(Ud_ref(9,:),'--'); hold on;
-plot(Ut_ref(9,:))
-title('Z direction foot force of front left foot')
-xlabel('time (ms)')
-ylabel('force (N)')
-legend('reference','MPC')
-hold off
-
-subplot(2,2,4)
-plot(Ud_ref(12,:),'--'); hold on;
-plot(Ut_ref(12,:))
-title('Z direction foot force of front left foot')
-xlabel('time (ms)')
-ylabel('force (N)')
-legend('reference','MPC')
-hold off
-%% Y direction foot forces
-figure()
-subplot(2,2,1)
-plot(Ud_ref(2,:),'--'); hold on;
-plot(Ut_ref(2,:))
-title('Y direction foot force of front left foot')
-xlabel('time (ms)')
-ylabel('force (N)')
-legend('reference','MPC')
-hold off
-
-subplot(2,2,2)
-plot(Ud_ref(5,:),'--'); hold on;
-plot(Ut_ref(5,:))
-title('Y direction foot force of front left foot')
-xlabel('time (ms)')
-ylabel('force (N)')
-legend('reference','MPC')
-hold off
-
-subplot(2,2,3)
-plot(Ud_ref(5,:),'--'); hold on;
-plot(Ut_ref(5,:))
-title('Y direction foot force of front left foot')
-xlabel('time (ms)')
-ylabel('force (N)')
-legend('reference','MPC')
-hold off
-
-subplot(2,2,4)
-plot(Ud_ref(11,:),'--'); hold on;
-plot(Ut_ref(11,:))
-title('Y direction foot force of front left foot')
-xlabel('time (ms)')
-ylabel('force (N)')
-legend('reference','MPC')
-hold off
-%% X direction foot forces
-figure()
-subplot(2,2,1)
-plot(Ud_ref(1,:),'--'); hold on;
-plot(Ut_ref(1,:))
-title('X direction foot force of front left foot')
-xlabel('time (ms)')
-ylabel('force (N)')
-legend('reference','MPC')
-hold off
-
-subplot(2,2,2)
-plot(Ud_ref(4,:),'--'); hold on;
-plot(Ut_ref(4,:))
-title('Z direction foot force of front left foot')
-xlabel('time (ms)')
-ylabel('force (N)')
-legend('reference','MPC')
-hold off
-
-subplot(2,2,3)
-plot(Ud_ref(4,:),'--'); hold on;
-plot(Ut_ref(4,:))
-title('X direction foot force of front left foot')
-xlabel('time (ms)')
-ylabel('force (N)')
-legend('reference','MPC')
-hold off
-
-subplot(2,2,4)
-plot(Ud_ref(10,:),'--'); hold on;
-plot(Ut_ref(10,:))
-title('X direction foot force of front left foot')
-xlabel('time (ms)')
-ylabel('force (N)')
-legend('reference','MPC')
-hold off
+%% plot states
+theta = []; thetad = [];
+for i = 1:length(Xout)
+    R = reshape(Xout(i,7:15),[3,3]);
+    Rd = reshape(Xdout(i,7:15),[3,3]);
+    theta = [theta; veeMap(logm(R))']; 
+    thetad = [thetad; veeMap(logm(Rd))']; 
+end
+X1 = tout;
+YMatrix1 = [Xout(:,1:3), Xdout(:,1:3)];
+YMatrix2 = [Xout(:,4:6), Xdout(:,4:6)];
+YMatrix3 = [theta(:,1:3), thetad(:,1:3)];
+YMatrix4 = [Xout(:,16:18), Xdout(:,16:18)];
+createfigure(X1, YMatrix1, YMatrix2, YMatrix3, YMatrix4)

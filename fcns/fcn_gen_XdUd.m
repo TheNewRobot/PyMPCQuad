@@ -6,6 +6,8 @@ gait = p.gait;
 acc_d = p.acc_d;
 vel_d = p.vel_d;
 yaw_d = p.yaw_d;
+wb_d = p.wb_d;
+ang_acc_d = p.ang_acc_d;
 
 %% generate reference trajectory
 % X = [pc dpc eta wb]
@@ -39,9 +41,8 @@ for ii = 1:lent
 %         wb_d = [0;0;0];
         
         %%%%%%%%%% angular motion %%%%%%%%%%%%%
-        ang_acc_d = [0;0;0.5];
         ea_d = [0;0;0];
-        wb_d = [0;0;0];
+        
         if isempty(Xt)
             ea_d = [0;0;0];
             wb_d = [0;0;0];

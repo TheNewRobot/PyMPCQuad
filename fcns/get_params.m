@@ -1,7 +1,7 @@
 function p = get_params(gait)
 
-p.predHorizon = 6;
-p.simTimeStep = 1/200;
+p.predHorizon = 7;
+p.simTimeStep = 1/250;
 p.Tmpc = 4/100;             % MPC prediction step time
 p.gait = gait;
 p.Umax = 50;

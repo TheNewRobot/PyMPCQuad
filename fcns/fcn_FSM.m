@@ -140,7 +140,6 @@ if gait == 1        % bound
         fsm = FSM_(:,ii);
         if fsm(1) == 1      % front stance
             s_ph = (t_(ii) - Ta(1)) / (Tb(1) - Ta(1));
-            
             th_d = polyval_bz(-p.th_co,s_ph);
             dth_d = polyval_bz(-p.dth_co,s_ph);
             z_d = polyval_bz(p.z_co,s_ph);
