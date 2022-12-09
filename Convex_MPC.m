@@ -18,7 +18,7 @@ gait = 0;
 p = get_params(gait);
 p.playSpeed = 5;
 p.flag_movie = 1;      % 1 - make movie
-use_Casadi = 1;        % 0 - build QP matrices, 1 -casadi with qpoases 
+use_Casadi = 0;        % 0 - build QP matrices, 1 -casadi with qpoases 
 
 % MPC parameters
 p.predHorizon = 15;
@@ -28,7 +28,7 @@ p.simTimeStep = 1/200;
 dt_sim = p.simTimeStep;
 
 % simulation time
-SimTimeDuration = 5;  % [sec]
+SimTimeDuration = 2;  % [sec]
 MAX_ITER = floor(SimTimeDuration/p.simTimeStep);
 
 % desired trajectory
@@ -150,16 +150,4 @@ toc
 [t,EA,EAd] = fig_animate(tout,Xout,Uout,Xdout,Udout,Uext,p);
 %[t,EA,EAd] = fig_animate_default(tout,Xout,Uout,Xdout,Udout,Uext,p);
 %% plot states
-theta = []; thetad = [];
-for i = 1:length(Xout)
-    R = reshape(Xout(i,7:15),[3,3]);
-    Rd = reshape(Xdout(i,7:15),[3,3]);
-    theta = [theta; veeMap(logm(R))']; 
-    thetad = [thetad; veeMap(logm(Rd))']; 
-end
-X1 = tout;
-YMatrix1 = [Xout(:,1:3), Xdout(:,1:3)];
-YMatrix2 = [Xout(:,4:6), Xdout(:,4:6)];
-YMatrix3 = [theta(:,1:3), thetad(:,1:3)];
-YMatrix4 = [Xout(:,16:18), Xdout(:,16:18)];
-createfigure(X1, YMatrix1, YMatrix2, YMatrix3, YMatrix4)
+fig_plot(tout,Xout,Uout,Xdout,Udout,Uext,p)

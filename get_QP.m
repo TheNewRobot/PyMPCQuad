@@ -50,7 +50,7 @@ function [F, G, A_ineq, b_ineq] = get_QP(Xt,Xd,Ud,idx,N,params)
     %% define costs 
     Qx = 1e6*eye(3);
     Qv = 1e6*eye(3);
-    Qa = 1.5e6*eye(3);
+    Qa = 1e6*eye(3);
     Qw = 1e6*eye(3);
     Q_i = blkdiag(Qx, Qv, Qa, Qw, 1e-5);
     P = Q_i; % terminal cost
