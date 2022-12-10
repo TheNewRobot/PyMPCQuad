@@ -28,7 +28,7 @@ set(plot1(1),'DisplayName','MPC');
 set(plot1(2),'DisplayName','ideal');
 
 % Create ylabel
-ylabel('f_1 (N)','FontWeight','bold','FontName','Arial');
+ylabel('$f_1$ (N)','FontWeight','bold','FontName','Arial','Interpreter','latex');
 
 box(subplot1,'on');
 hold(subplot1,'off');
@@ -37,6 +37,7 @@ set(subplot1,'FontName','Arial','FontSize',12,'LineWidth',1.5);
 % Create legend
 legend1 = legend(subplot1,'show');
 set(legend1,'EdgeColor',[0 0 0]);
+ylim([0,40])
 
 % Create subplot
 subplot2 = subplot(4,2,3,'Parent',figure1);
@@ -48,7 +49,8 @@ set(plot2(1),'DisplayName','MPC');
 set(plot2(2),'DisplayName','ideal');
 
 % Create ylabel
-ylabel('f_2 (N)','FontWeight','bold','FontName','Arial');
+ylabel('$f_2$ (N)','FontWeight','bold','FontName','Arial', 'Interpreter','latex');
+ylim([0,40])
 
 box(subplot2,'on');
 hold(subplot2,'off');
@@ -67,7 +69,7 @@ set(plot3(1),'DisplayName','MPC');
 set(plot3(2),'DisplayName','ideal');
 
 % Create ylabel
-ylabel('f_3 (N)','FontWeight','bold','FontName','Arial');
+ylabel('$f_3$ (N)','FontWeight','bold','FontName','Arial','Interpreter','latex');
 
 box(subplot3,'on');
 hold(subplot3,'off');
@@ -75,6 +77,7 @@ hold(subplot3,'off');
 set(subplot3,'FontName','Arial','FontSize',12,'LineWidth',1.5);
 % Create legend
 legend(subplot3,'show');
+ylim([0,40])
 
 % Create subplot
 subplot4 = subplot(4,2,7,'Parent',figure1);
@@ -86,7 +89,8 @@ set(plot4(1),'DisplayName','MPC');
 set(plot4(2),'DisplayName','ideal');
 
 % Create ylabel
-ylabel('f_4 (N)','FontWeight','bold','FontName','Arial');
+ylabel('$f_4$ (N)','FontWeight','bold','FontName','Arial','Interpreter','latex');
+ylim([0,40])
 
 % Create xlabel
 xlabel('time (s)','FontWeight','bold','FontSize',12);
@@ -104,23 +108,23 @@ set(legend2,...
 axes('Parent',figure1);
 axis off
 
-% Create xlabel
-xlabel('time (s)','FontWeight','bold','FontSize',12,'FontName','Arial',...
-    'Visible','on');
+% % Create xlabel
+% xlabel('time (s)','FontWeight','bold','FontSize',12,'FontName','Arial',...
+%     'Visible','on');
 
 
 %% state plots
 % Create subplot
-subplot1 = subplot(4,2,2);
-hold(subplot1,'on');
+subplot5 = subplot(4,2,2);
+hold(subplot5,'on');
 
 % Create multiple line objects using matrix input to plot
-plot1 = plot(X1,YMatrix5,'LineWidth',2);
-set(plot1(1),'DisplayName','$p_x$');
-set(plot1(2),'DisplayName','$p_y$');
-set(plot1(3),'DisplayName','$p_{x,ref}$',...
+plot5 = plot(X1,YMatrix5,'LineWidth',2);
+set(plot5(1),'DisplayName','$p_x$');
+set(plot5(2),'DisplayName','$p_y$');
+set(plot5(3),'DisplayName','$p_{x,ref}$',...
     'Color',[0.494117647058824 0.184313725490196 0.556862745098039]);
-set(plot1(4),'SeriesIndex',5,'DisplayName','$p_{y,ref}$','LineStyle','--',...
+set(plot5(4),'SeriesIndex',5,'DisplayName','$p_{y,ref}$','LineStyle','--',...
     'Color',[0.850980392156863 0.325490196078431 0.0980392156862745]);
 
 % Create ylabel
@@ -129,27 +133,28 @@ ylabel('$\mathbf{p}$ (m)','HorizontalAlignment','center',...
     'FontName','Arial',...
     'Interpreter','latex');
 
-box(subplot1,'on');
-hold(subplot1,'off');
+box(subplot5,'on');
+hold(subplot5,'off');
 % Set the remaining axes properties
-set(subplot1,'FontName','Arial','FontSize',12,'LineWidth',1.5);
+set(subplot5,'FontName','Arial','FontSize',12,'LineWidth',1.5);
 % Create legend
-legend1 = legend(subplot1,'show');
-set(legend1,'Orientation','horizontal','Location','north',...
+legend5 = legend(subplot5,'show');
+set(legend5,'Orientation','horizontal','Location','north',...
     'Interpreter','latex',...
     'EdgeColor',[0 0 0]);
+ylim(subplot5,[-0.2 0.7]);
 
 % Create subplot
-subplot2 = subplot(4,2,4);
-hold(subplot2,'on');
+subplot6 = subplot(4,2,4);
+hold(subplot6,'on');
 
 % Create multiple line objects using matrix input to plot
-plot2 = plot(X1,YMatrix6,'LineWidth',2);
-set(plot2(1),'DisplayName','$v_x$');
-set(plot2(2),'DisplayName','$v_y$');
-set(plot2(3),'DisplayName','$v_{x,ref}$',...
+plot6 = plot(X1,YMatrix6,'LineWidth',2);
+set(plot6(1),'DisplayName','$v_x$');
+set(plot6(2),'DisplayName','$v_y$');
+set(plot6(3),'DisplayName','$v_{x,ref}$',...
     'Color',[0.494117647058824 0.184313725490196 0.556862745098039]);
-set(plot2(4),'DisplayName','$v_{y,ref}$','LineStyle','--',...
+set(plot6(4),'DisplayName','$v_{y,ref}$','LineStyle','--',...
     'Color',[0.850980392156863 0.325490196078431 0.0980392156862745]);
 
 % Create ylabel
@@ -159,28 +164,28 @@ ylabel('$\mathbf{v}$ (m/s)','HorizontalAlignment','center',...
     'Interpreter','latex');
 
 % Uncomment the following line to preserve the Y-limits of the axes
-ylim(subplot2,[0 0.7]);
-box(subplot2,'on');
-hold(subplot2,'off');
+ylim(subplot6,[-0.2 0.8]);
+box(subplot6,'on');
+hold(subplot6,'off');
 % Set the remaining axes properties
-set(subplot2,'FontName','Arial','FontSize',12,'LineWidth',1.5);
+set(subplot6,'FontName','Arial','FontSize',12,'LineWidth',1.5);
 % Create legend
-legend2 = legend(subplot2,'show');
-set(legend2,...
+legend6 = legend(subplot6,'show');
+set(legend6,...
     'Location','north',...
     'Orientation','horizontal',...
     'Interpreter','latex');
 
 % Create subplot
-subplot3 = subplot(4,2,6);
-hold(subplot3,'on');
+subplot7 = subplot(4,2,6);
+hold(subplot7,'on');
 
 % Create multiple line objects using matrix input to plot
-plot3 = plot(X1,YMatrix7,'LineWidth',2);
-set(plot3(1),'DisplayName','$\phi$');
-set(plot3(2),'DisplayName','$\theta$');
-set(plot3(3),'DisplayName','$\psi$');
-set(plot3(4),'DisplayName','$\psi_{ref}$','LineStyle','--',...
+plot7 = plot(X1,YMatrix7,'LineWidth',2);
+set(plot7(1),'DisplayName','$\phi$');
+set(plot7(2),'DisplayName','$\theta$');
+set(plot7(3),'DisplayName','$\psi$');
+set(plot7(4),'DisplayName','$\psi_{ref}$','LineStyle','--',...
     'Color',[0.494117647058824 0.184313725490196 0.556862745098039]);
 
 % Create ylabel
@@ -190,30 +195,31 @@ ylabel('$\mathbf{\Theta}$ (rad)','HorizontalAlignment','center',...
     'Interpreter','latex');
 
 % Uncomment the following line to preserve the Y-limits of the axes
-ylim(subplot3,[-0.155368462626757 1.1]);
-box(subplot3,'on');
-hold(subplot3,'off');
+ylim(subplot7,[-0.155368462626757 1.1]);
+box(subplot7,'on');
+hold(subplot7,'off');
 % Set the remaining axes properties
-set(subplot3,'FontName','Arial','FontSize',12,'LineWidth',1.5);
+set(subplot7,'FontName','Arial','FontSize',12,'LineWidth',1.5);
 % Create legend
-legend3 = legend(subplot3,'show');
-set(legend3,'Orientation','horizontal','Location','north',...
+legend7 = legend(subplot7,'show');
+set(legend7,'Orientation','horizontal','Location','north',...
     'Interpreter','latex');
 
 % Create subplot
-subplot4 = subplot(4,2,8);
-hold(subplot4,'on');
+subplot8 = subplot(4,2,8);
+hold(subplot8,'on');
 
 % Create multiple line objects using matrix input to plot
-plot4 = plot(X1,YMatrix8,'LineWidth',2);
-set(plot4(1),'DisplayName','$\omega_\phi$');
-set(plot4(2),'DisplayName','$\omega_\theta$');
-set(plot4(3),'DisplayName','$\omega_\psi$');
-set(plot4(4),'DisplayName','$\omega_{\phi,ref}$','LineStyle','--',...
+plot8 = plot(X1,YMatrix8,'LineWidth',2);
+set(plot8(1),'DisplayName','$\omega_\phi$');
+set(plot8(2),'DisplayName','$\omega_\theta$');
+set(plot8(3),'DisplayName','$\omega_\psi$');
+set(plot8(4),'DisplayName','$\omega_{\phi,ref}$','LineStyle','--',...
     'Color',[0.494117647058824 0.184313725490196 0.556862745098039]);
 
 % Create ylabel
-ylabel('$\mathbf{\omega} (m/s)$','HorizontalAlignment','center',...
+ylabel('$\mathbf{\omega}$ (m/s)','HorizontalAlignment','center',...,
+    'FontWeight','bold',...
     'FontName','Arial',...
     'Interpreter','latex');
 
@@ -221,14 +227,14 @@ ylabel('$\mathbf{\omega} (m/s)$','HorizontalAlignment','center',...
 xlabel('time (s)','FontWeight','bold','FontName','Arial');
 
 % Uncomment the following line to preserve the Y-limits of the axes
-ylim(subplot4,[-0.056609522720715 1.2]);
-box(subplot4,'on');
-hold(subplot4,'off');
+ylim(subplot8,[-0.155368462626757  1.2]);
+box(subplot8,'on');
+hold(subplot8,'off');
 % Set the remaining axes properties
-set(subplot4,'FontName','Arial','FontSize',12,'LineWidth',1.5);
+set(subplot8,'FontName','Arial','FontSize',12,'LineWidth',1.5);
 % Create legend
-legend4 = legend(subplot4,'show');
-set(legend4,...
+legend8 = legend(subplot8,'show');
+set(legend8,...
     'Location','north',...
     'Orientation','horizontal',...
     'Interpreter','latex');
@@ -237,13 +243,15 @@ set(legend4,...
 axes1 = axes;
 axis off
 
-% Create xlabel
-xlabel('time (s)','FontWeight','bold','FontSize',12,'FontName','Arial',...
-    'Visible','on');
+% % Create xlabel
+% xlabel('time (s)','FontWeight','bold','FontSize',12,'FontName','Arial',...
+%     'Visible','on');
 
 % Uncomment the following line to preserve the X-limits of the axes
-% xlim(axes1,[0.0409946224906228 0.950085531581532]);
+ xlim(axes1,[0.0409946224906228 0.950085531581532]);
 % Uncomment the following line to preserve the Y-limits of the axes
-% ylim(axes1,[0.0528881333091042 0.961979042400013]);
+ylim(axes1,[0.0528881333091042 0.961979042400013]);
+
+exportgraphics(figure1,'Figures/state.png','Resolution',300)
 
 

@@ -34,4 +34,9 @@ YMatrix8 = [Xout(:,16:18),Xdout(:,18)];
 
 createfigure(X1, YMatrix1, YMatrix2, YMatrix3, YMatrix4, ...
                     YMatrix5, YMatrix6, YMatrix7, YMatrix8);
+
+
+%% plot phase portrait
+figure()
+plot(theta(:,2),Xout(:,17))
 end

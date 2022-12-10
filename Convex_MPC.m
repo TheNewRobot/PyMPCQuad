@@ -17,7 +17,7 @@ addpath fcns fcns_MPC
 gait = 0;
 p = get_params(gait);
 p.playSpeed = 5;
-p.flag_movie = 1;      % 1 - make movie
+p.flag_movie = 0;      % 1 - make movie
 use_Casadi = 0;        % 0 - build QP matrices, 1 -casadi with qpoases 
 
 % MPC parameters
@@ -28,17 +28,21 @@ p.simTimeStep = 1/200;
 dt_sim = p.simTimeStep;
 
 % simulation time
-SimTimeDuration = 2;  % [sec]
+SimTimeDuration = 10;  % [sec]
 MAX_ITER = floor(SimTimeDuration/p.simTimeStep);
 
-% desired trajectory
+% desired trajectory for trot turn
 p.yaw_d = pi/4;
 p.acc_d = 0.5;
 p.vel_d = [0.5*cos(p.yaw_d);0.5*sin(p.yaw_d)];
 
+% desired trajectory for trot walk
+% p.yaw_d = 0;
+% p.acc_d = 0.5;
+% p.vel_d = [0.5;0];
+
 p.wb_d = [0;0;0];
 p.ang_acc_d = [0;0;0.5];
-
 
 %% Model Predictive Control
 % --- initial condition ---
