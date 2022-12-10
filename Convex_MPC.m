@@ -9,7 +9,7 @@
 
 %% initialization
 clear all;close all;clc
-addpath fcns fcns_MPC
+addpath FSM getMPC plots robot trajGen utils
 
 %% --- parameters ---
 % ---- gait ----
@@ -28,7 +28,7 @@ p.simTimeStep = 1/200;
 dt_sim = p.simTimeStep;
 
 % simulation time
-SimTimeDuration = 10;  % [sec]
+SimTimeDuration = 2;  % [sec]
 MAX_ITER = floor(SimTimeDuration/p.simTimeStep);
 
 % desired trajectory for trot turn
