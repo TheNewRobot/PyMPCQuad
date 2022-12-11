@@ -9,7 +9,8 @@
 
 %% initialization
 clear all;close all;clc
-addpath FSM getMPC plots robot trajGen utils
+addpath FSM getMPC plots robot trajGen utils refGen
+import casadi.*
 
 %% --- parameters ---
 % ---- gait ----
