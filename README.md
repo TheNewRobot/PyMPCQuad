@@ -1,5 +1,5 @@
 # LTV MPC for Quadruped Locomotion
-preprimt available here: https://arxiv.org/abs/2212.05154
+preprint available here: https://arxiv.org/abs/2212.05154
 
 ![Quadruped Trotting](gif/edited_states_turn_trot.gif)
 
