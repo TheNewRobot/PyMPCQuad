@@ -15,7 +15,8 @@ import casadi.*
 %% --- parameters ---
 % ---- gait ----
 % 0-trot; 1-bound; 2-pacing 3-gallop; 4-trot run; 5-crawl
-gait = 0;
+% -1:pose_control;
+gait = -1;
 p = get_params(gait);
 p.playSpeed = 5;
 p.flag_movie = 0;      % 1 - make movie
@@ -29,21 +30,30 @@ p.simTimeStep = 1/200;
 dt_sim = p.simTimeStep;
 
 % simulation time
-SimTimeDuration = 2;  % [sec]
+SimTimeDuration = 1;  % [sec]
 MAX_ITER = floor(SimTimeDuration/p.simTimeStep);
 
-% desired trajectory for trot turn
-p.yaw_d = pi/4;
-p.acc_d = 0.5;
-p.vel_d = [0.5*cos(p.yaw_d);0.5*sin(p.yaw_d)];
+if(gait>=0)
+    % desired trajectory for trot turn
+    p.yaw_d = pi/4;
+    p.acc_d = 0.5;
+    p.vel_d = [0.5*cos(p.yaw_d);0.5*sin(p.yaw_d)];
+    
+    % desired trajectory for trot walk
+    % p.yaw_d = 0;
+    % p.acc_d = 0.5;
+    % p.vel_d = [0.5;0];
+    
+    p.wb_d = [0;0;0];
+    p.ang_acc_d = [0;0;0.5];
+end
 
-% desired trajectory for trot walk
-% p.yaw_d = 0;
-% p.acc_d = 0.5;
-% p.vel_d = [0.5;0];
-
-p.wb_d = [0;0;0];
-p.ang_acc_d = [0;0;0.5];
+if(gait==-1)
+     p.roll_d = 0;
+     p.pitch_d = pi/4;
+     p.yaw_d = 0;
+     p.ang_acc_d = [0;0.5;0];
+end
 
 %% Model Predictive Control
 % --- initial condition ---

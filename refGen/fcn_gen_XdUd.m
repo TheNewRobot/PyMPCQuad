@@ -3,11 +3,7 @@ function [Xd,Ud] = fcn_gen_XdUd(t,Xt,bool_inStance,p)
 %% parameters
 gait = p.gait;
 
-acc_d = p.acc_d;
-vel_d = p.vel_d;
-yaw_d = p.yaw_d;
-wb_d = p.wb_d;
-ang_acc_d = p.ang_acc_d;
+
 
 %% generate reference trajectory
 % X = [pc dpc eta wb]
@@ -16,7 +12,13 @@ Xd = zeros(30,lent);
 Ud = zeros(12,lent);
 Rground = p.Rground;           % ground slope
 for ii = 1:lent
+    %%%%%%%%%% any walking gait %%%%%%%%%%%%%
     if gait >= 0        % --- March forward and rotate ---
+        acc_d = p.acc_d;
+        vel_d = p.vel_d;
+        yaw_d = p.yaw_d;
+        wb_d = p.wb_d;
+        ang_acc_d = p.ang_acc_d;
         %%%%%%%%%% linear motion %%%%%%%%%%%%%
         pc_d = [0;0;p.z0];
         dpc_d = [0;0;0];
@@ -56,12 +58,38 @@ for ii = 1:lent
             ea_d(3) = yaw_d;
         end
         vR_d = reshape(expm(hatMap(ea_d)),[9,1]);
+        pfd = reshape(Rground * p.pf34,[12,1]);
+    end
+    
+    %%%% for pose control %%%%%%%%%
+    if(gait==-1)
+        roll_d = p.roll_d;
+        pitch_d = p.pitch_d;
+        yaw_d = p.yaw_d;
+        ang_acc_d = p.ang_acc_d;
+        ea_d = [0;0;0];
+        wb_d = [0;0;0];
+        if isempty(Xt)
+                ea_d = [0;0;0];
+                wb_d = [0;0;0];
+            else
+%                 ea_d = [roll_d;pitch_d;yaw_d];
+                wb_d(2) = ang_acc_d(2) * t(ii);
+                ea_d(2) = 1/2 * ang_acc_d(2) * t(ii)^2;
+        end
+        if  ea_d(2)>=pitch_d
+            wb_d(2) = 0;
+            ea_d(2) = pitch_d;
+        end
+        pc_d = [0;0;p.z0];
+        dpc_d = [0;0;0];
+        vR_d = reshape(expm(hatMap(ea_d)),[9,1]);
+        pfd = reshape(Rground * p.pf34,[12,1]);
     end
 
-    pfd = reshape(Rground * p.pf34,[12,1]);
     Xd(:,ii) = [pc_d;dpc_d;vR_d;wb_d;pfd];
     
-    %%%% force
+    %%%% force for backflip %%%%%%%%%
     if (gait == -3)
         Ud(:,ii) = U_d;
     else
