@@ -1,4 +1,4 @@
-function q = fcn_invKin3(X,pf,p)
+function q = fcn_invKin3(X,pf,p,ii)
 pf = reshape(pf,length(pf),1);
 % states
 pcom = X(1:3);
@@ -51,6 +51,7 @@ q1 = a - sign_d * b;
 
 %% q2
 r = norm(vp,2);
+
 vd = sign_d * [0 d*cos(q1) d*sin(q1)]';
 rf = norm(vp - vd,2);
 vf = rx(q1)' * (vp - vd);
@@ -73,7 +74,7 @@ c = acos(cosc);
 q3 = -(pi - c);
 
 q = [q1 q2 q3];
-
+termination = 1;
 end
 
 

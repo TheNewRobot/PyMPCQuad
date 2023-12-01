@@ -23,6 +23,8 @@ for i = 1:length(Xout)
     Rd = reshape(Xdout(i,7:15),[3,3]);
     theta = [theta; veeMap(logm(R))']; 
     thetad = [thetad; veeMap(logm(Rd))']; 
+    testamento = 1;
+    
 end
 
 YMatrix5 = [Xout(:,1:2),Xdout(:,1:2)];

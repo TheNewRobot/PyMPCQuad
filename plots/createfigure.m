@@ -18,6 +18,7 @@ function createfigure(X1, YMatrix1, YMatrix2, YMatrix3, YMatrix4, ...
 figure1 = figure('WindowState','maximized');
 
 %% fz plots
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Create subplot
 subplot1 = subplot(4,2,1,'Parent',figure1);
 hold(subplot1,'on');
@@ -38,7 +39,7 @@ set(subplot1,'FontName','Arial','FontSize',12,'LineWidth',1.5);
 legend1 = legend(subplot1,'show');
 set(legend1,'EdgeColor',[0 0 0]);
 ylim([0,40])
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Create subplot
 subplot2 = subplot(4,2,3,'Parent',figure1);
 hold(subplot2,'on');
@@ -58,7 +59,7 @@ hold(subplot2,'off');
 set(subplot2,'FontName','Arial','FontSize',12,'LineWidth',1.5);
 % Create legend
 legend(subplot2,'show');
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Create subplot
 subplot3 = subplot(4,2,5,'Parent',figure1);
 hold(subplot3,'on');
@@ -78,7 +79,7 @@ set(subplot3,'FontName','Arial','FontSize',12,'LineWidth',1.5);
 % Create legend
 legend(subplot3,'show');
 ylim([0,40])
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Create subplot
 subplot4 = subplot(4,2,7,'Parent',figure1);
 hold(subplot4,'on');
@@ -143,7 +144,7 @@ set(legend5,'Orientation','horizontal','Location','north',...
     'Interpreter','latex',...
     'EdgeColor',[0 0 0]);
 ylim(subplot5,[-0.2 0.7]);
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Create subplot
 subplot6 = subplot(4,2,4);
 hold(subplot6,'on');
@@ -175,7 +176,7 @@ set(legend6,...
     'Location','north',...
     'Orientation','horizontal',...
     'Interpreter','latex');
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Create subplot
 subplot7 = subplot(4,2,6);
 hold(subplot7,'on');
@@ -204,7 +205,7 @@ set(subplot7,'FontName','Arial','FontSize',12,'LineWidth',1.5);
 legend7 = legend(subplot7,'show');
 set(legend7,'Orientation','horizontal','Location','north',...
     'Interpreter','latex');
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Create subplot
 subplot8 = subplot(4,2,8);
 hold(subplot8,'on');
@@ -238,7 +239,7 @@ set(legend8,...
     'Location','north',...
     'Orientation','horizontal',...
     'Interpreter','latex');
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Create axes
 axes1 = axes;
 axis off

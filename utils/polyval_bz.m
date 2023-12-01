@@ -29,10 +29,8 @@ function b = polyval_bz(alpha, s)
             c = 0;
     end
         
-    
-        
     for k = 0:M
-        
+       
         b = b + alpha(:,k+1) .* factorial(M)/(factorial(k)*factorial(M-k)) .* s.^k .* (1-s).^(M-k) ;
     end
     

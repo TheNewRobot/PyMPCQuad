@@ -117,5 +117,4 @@ function [F, G, A_ineq, b_ineq] = get_QP(Xt,Xd,Ud,idx,N,params)
     G = 2*(R_hat + B_hat'*Q_hat*B_hat);
     y = reshape(X_des,[],1);
     F = 2*B_hat'*Q_hat*(A_hat*X_cur-y);
-    
 end

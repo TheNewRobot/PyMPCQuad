@@ -12,14 +12,42 @@ clear all;close all;clc
 addpath FSM getMPC plots robot trajGen utils refGen
 import casadi.*
 
+saveMAT  = true;
+%Python Initialization
+currentDir = pwd;
+% Add the directory containing the Python script to the Python search path
+py.sys.path().append(currentDir);
+
+% Specify subfolders to append
+subfolders = {'python_mod'};
+
+% Append each subfolder to the Python search path
+for i = 1:length(subfolders)
+    subfolderPath = fullfile(currentDir, subfolders{i});
+    py.sys.path().append(subfolderPath);
+end
+
+% Import the sys module to show the current path
+sys = py.importlib.import_module('sys');
+disp('Python sys.path after appending the current directory:');
+disp(char(sys.path));
+
+% Import the Python module
+pyModule = py.importlib.import_module('my_test');
+
+%% Test
+clc
+% % Cal the square function from the Python module
+x = 5;  % Example input
+result = pyModule.square(x);
+
 %% --- parameters ---
 % ---- gait ----
-% 0-trot; 1-bound; 2-pacing 3-gallop; 4-trot run; 5-crawl
-% -1:pose_control;
-gait = -1;
+% 0-trot; 
+gait = 0;
 p = get_params(gait);
-p.playSpeed = 5;
-p.flag_movie = 0;      % 1 - make movie
+p.playSpeed = 10;
+p.flag_movie = 1;      % 1 - make movie
 use_Casadi = 0;        % 0 - build QP matrices, 1 -casadi with qpoases 
 
 % MPC parameters
@@ -29,8 +57,8 @@ p.Tmpc = 1/50;
 p.simTimeStep = 1/200;
 dt_sim = p.simTimeStep;
 
-% simulation time
-SimTimeDuration = 1;  % [sec]
+% simulation timec
+SimTimeDuration = 3;  % [sec]
 MAX_ITER = floor(SimTimeDuration/p.simTimeStep);
 
 if(gait>=0)
@@ -77,6 +105,7 @@ Ut_ref = []; Ud_ref = [];
 Selection = [];
 
 for ii = 1:MAX_ITER
+    fprintf('Iteration number: %i \n',ii);
     % --- time vector ---
     t_ = dt_sim * (ii-1) + p.Tmpc * (0:p.predHorizon-1);
     
@@ -84,7 +113,8 @@ for ii = 1:MAX_ITER
     if gait == 1
         [FSM,Xd,Ud,Xt] = fcn_FSM_bound(t_,Xt,p);
     else
-        [FSM,Xd,Ud,Xt] = fcn_FSM(t_,Xt,p);
+        [FSM,Xd,Ud,Xt] = fcn_FSM(t_,Xt,p,ii);
+        
     end
 
     % set up selection matrix (makes problem infeasible)
@@ -111,8 +141,9 @@ for ii = 1:MAX_ITER
     else
         %form QP using explicit matrices
         [f, G, A, b] = get_QP(Xt,Xd,Ud,idx,N,p);
+
         % solve QP using quadprog     
-        [zval] = quadprog(G,f,A,b,[],[],[],[]);
+        zval = quadprog(G,f,A,b,[],[],[],[]);
     end
 
     % get the foot forces value for first time step and repeat
@@ -135,16 +166,13 @@ for ii = 1:MAX_ITER
     [u_ext,p_ext] = fcn_get_disturbance(tstart,p);
     p.p_ext = p_ext;        % position of external force
     u_ext = 0*u_ext;
-    
     %% --- simulate without any external disturbances ---
     [t,X] = ode45(@(t,X)dynamics_SRB(t,X,Ut,Xd,u_ext,p),[tstart,tend],Xt);
-    
-    
+    % 61 times is called
     %% --- update ---
     Xt = X(end,:)';
     tstart = tend;
     tend = tstart + dt_sim;
-    
     %% --- log ---  
     lent = length(t(2:end));
     tout = [tout;t(2:end)];
@@ -154,7 +182,10 @@ for ii = 1:MAX_ITER
     Udout = [Udout;repmat(Ud(:,1)',[lent,1])];
     Uext = [Uext;repmat(u_ext',[lent,1])];
     FSMout = [FSMout;repmat(FSM',[lent,1])];
-    
+    if ii == 62
+
+        testamento = 1;
+    end
     waitbar(ii/MAX_ITER,h_waitbar,'Calculating...');
 end
 close(h_waitbar)
@@ -162,7 +193,13 @@ fprintf('Calculation Complete!\n')
 toc
 
 %% Animation
+
 [t,EA,EAd] = fig_animate(tout,Xout,Uout,Xdout,Udout,Uext,p);
 %[t,EA,EAd] = fig_animate_default(tout,Xout,Uout,Xdout,Udout,Uext,p);
 %% plot states
 fig_plot(tout,Xout,Uout,Xdout,Udout,Uext,p)
+if saveMAT
+    save('mpc_experiment.mat', 'tout', 'Xout','Uout','Xdout','Udout','Uext','-v7.3');
+end
+
+

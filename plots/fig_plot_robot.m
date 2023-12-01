@@ -1,4 +1,4 @@
-function fig_plot_robot(Xt,Ut,Ue,p)
+function fig_plot_robot(Xt,Ut,Ue,p,ii)
 
 %% parameters
 L = p.L;
@@ -19,7 +19,7 @@ pf34 =  reshape(Xt(19:30),[3,4]);
 
 % GRF
 f34 = reshape(Ut,[3,4]);
-
+testamento  = 1;
 
 %% forward kinematics
 % hips
@@ -90,9 +90,11 @@ for i_leg = 1:4
     end
     
     q_idx = 3*(i_leg - 1) + (1:3); %3*i_leg-2 : 3*i_leg;
-    q(q_idx) = fcn_invKin3(Xt,pf34(:,i_leg),p);
+    q(q_idx) = fcn_invKin3(Xt,pf34(:,i_leg),p,ii);
     chain_leg(:,:,i_leg) = legKin(Twd2com,q(q_idx),p);
+    
 end
+testatmento = 1;
 % ---------------------
 chain_leg1 = chain_leg(:,:,1);
 chain_leg2 = chain_leg(:,:,2);
@@ -134,8 +136,9 @@ end
 
 % external force
 p_ext_R = R * p.p_ext + pcom;
+
 chain_Ue = [p_ext_R,p_ext_R + 0.01 * Ue];
-plot3(chain_Ue(1,:),chain_Ue(2,:),chain_Ue(3,:),'c','linewidth',1.5)
+plot3(chain_Ue(1,:),chain_Ue(2,:),chain_Ue(3,:),'k','linewidth',3.5)
 
 % ground
 Rground = p.Rground;
@@ -177,6 +180,7 @@ function chain = legKin(Twd2com,q,p)
                 0 0 0 1];
     Tk2f = [eye(3) [l2 0 0]';
                 0 0 0 1];
+    
     Twd2h = Twd2com * Tcom2h;
     Twd2s = Twd2h * Th2s;
     Twd2k = Twd2s * Ts2k;
@@ -188,6 +192,7 @@ function chain = legKin(Twd2com,q,p)
     p_f_wd = Twd2f(1:3,4);
 
     chain = [p_h_wd p_s_wd p_k_wd p_f_wd];
+    nrtestamento = 1;
 end
 
 

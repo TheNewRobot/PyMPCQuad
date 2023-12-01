@@ -99,8 +99,9 @@ for ii = 1:lent
         else
             Ud([3,6,9,12],ii) = bool_inStance(:,ii)*(p.mass*p.g/sum_inStance);
         end
+        
     end
 end
-
+testamento = 1;
 end
 

@@ -1,5 +1,6 @@
 function [t,EA,EAd] = fig_animate(tout,Xout,Uout,Xdout,Udout,Uext,p)
 
+% Fixed the ones that are simple as the one for trot (0)
 flag_movie = p.flag_movie;
 
 if flag_movie
@@ -7,7 +8,7 @@ if flag_movie
     try
         name = ['test.mp4'];
         vidfile = VideoWriter(name,'MPEG-4');
-    catch ME
+    catch ME %MATLAB EXCEPTION
         name = ['test'];
         vidfile = VideoWriter(name,'Motion JPEG AVI');
     end
@@ -35,6 +36,7 @@ N = 3;M = 3;    % subplot size
 nt = length(t);
 EA = zeros(nt,3);
 EAd = zeros(nt,3);
+
 for ii = 1:nt
     EA(ii,:) = fcn_X2EA(X(ii,:));
     EAd(ii,:) = fcn_X2EA(Xd(ii,:));
@@ -81,7 +83,7 @@ for ii = 1:p.playSpeed:nt
     
     % plot robot & GRF
     % real
-    fig_plot_robot(X(ii,:)',U(ii,:)',Ue(ii,:)',p)
+    fig_plot_robot(X(ii,:)',U(ii,:)',Ue(ii,:)',p,ii)
     % desired
     %fig_plot_robot_d(Xd(ii,:)',0*Ud(ii,:)',p)
     
@@ -103,22 +105,8 @@ for ii = 1:p.playSpeed:nt
          t(1:ii),thetad(1:ii,3),'b--','linewidth',1)
     h_x.XLim = [t(1) t(end)];
     legend(h_x,'r','p','y', 'Location', 'northeastoutside');
-    set( get(h_x,'Title'), 'String', 'Angluar Position [rad]');
-%     %set( get(h_x,'legend'), 'String', 'x_pos','y_pos','z_pos');
-%     
+    set( get(h_x,'Title'), 'String', 'Angluar Position [rad]');  
     
-    %%%%%%%%% position %%%%%%%%%
-%     plot(h_x,t(1:ii),X(1:ii,1),'r',...
-%          t(1:ii),X(1:ii,2),'g',...
-%          t(1:ii),X(1:ii,3),'b',...
-%          t(1:ii),Xd(1:ii,1),'r--',...
-%          t(1:ii),Xd(1:ii,2),'g--',...
-%          t(1:ii),Xd(1:ii,3),'b--','linewidth',1)
-%     h_x.XLim = [t(1) t(end)];
-%     legend(h_x,'x','y','z', 'Location', 'northeastoutside');
-%     set( get(h_x,'Title'), 'String', 'Position [m]');
-    %set( get(h_x,'legend'), 'String', 'x_pos','y_pos','z_pos');
-
     %%%%%%%%% velocity %%%%%%%%%
     plot(h_dx,t(1:ii),X(1:ii,4),'r',...
          t(1:ii),X(1:ii,5),'g',...

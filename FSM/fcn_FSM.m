@@ -1,6 +1,7 @@
-function [FSMout,Xd,Ud,Xt] = fcn_FSM(t_,Xt,p)
+function [FSMout,Xd,Ud,Xt] = fcn_FSM(t_,Xt,p,flag_ii)
 
 %% parameters
+
 [L,W,d] = deal(p.L,p.W,p.d);
 gait = p.gait;
 Tst_ = p.Tst;
@@ -188,6 +189,11 @@ for i_leg = 1:4
     temp(temp < -0.15) = -0.15;
     temp(temp > 0.15) = 0.15;
     p_cap(:,i_leg) = pc(1:2) + p_hip_R(1:2,i_leg) + temp;
+    if flag_ii==61
+    
+        
+        testamento = 1;
+    end
 end
 
 % desired foot placement
@@ -214,15 +220,21 @@ else
             co_x = linspace(pf_R_trans(idx(1)),p_cap(1,i_leg),6);
             co_y = linspace(pf_R_trans(idx(2)),p_cap(2,i_leg),6);
             co_z = [0 0 0.1 0.1 0 -0.002];
+            
             pfd(idx) = [polyval_bz(co_x,s(i_leg));
                         polyval_bz(co_y,s(i_leg));
                         polyval_bz(co_z,s(i_leg))];
+               d =1;
         end
     end
     Xd(idx_pf,:) = repmat(pfd,[1,p.predHorizon]);
 end
 
 %% output
+% if flag_ii==40
+% 
+%     testamento = 1;
+% end
 FSMout = FSM;
 end
 

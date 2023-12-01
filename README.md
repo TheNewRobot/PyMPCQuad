@@ -1,24 +1,30 @@
-# LTV MPC for Quadruped Locomotion
-preprint available here: https://arxiv.org/abs/2212.05154
+# Python implemenation of a LTV MPC for Quadruped Locomotion
+reference preprint: https://arxiv.org/abs/2212.05154
 
-**Authors:** Andrew Zheng and Sriram S.K.S Narayanan
-
-
-![Quadruped Trotting](gif/edited_states_turn_trot.gif)
+**Authors:** Arturo Flores 
 
 
-This work presents an existing state-of-the-art optimal controller for quadruped locomotion. The robot dynamics is represented using a single rigid body (SRB) model. A linear time-varying model predictive controller (LTV MPC) is proposed by using linearization schemes. Simulation results show that the LTV MPC can execute various gaits, such as trot and crawl, and is capable of tracking desired reference trajectories even under unknown external disturbances. The LTV MPC is implemented as a quadratic program using $qpOASES$ through the $CasADi$ interface at 50 Hz. The proposed MPC can reach up to 1 m/s top speed with an acceleration of 0.5 m/s$^2$ executing a trot gait. 
+![Quadruped Trotting](gif/implementation.gif)
+
+
+This work presents an existing state-of-the-art optimal controller for quadruped locomotion using Python. The robot dynamics is represented using a single rigid body (SRB) model. A linear time-varying model predictive controller (LTV MPC) is proposed by using linearization schemes. Simulation results show that the LTV MPC can execute various gaits, such as trot and crawl, and is capable of tracking desired reference trajectories even under unknown external disturbances. The LTV MPC is implemented as a quadratic program using $qpOASES$ through the $CasADi$ interface at 50 Hz. The proposed MPC can reach up to 1 m/s top speed with an acceleration of 0.5 m/s$^2$ executing a trot gait. The current results a pretty slow, but we are actively working on this to speed up the process.
 
 ## Requirements
-Basic: MATLAB and MATLAB optimization toolbox
-Optional: CasADi
+Create a python virtual environment (recommended)
 
+```
+python3 -m venv <myenvname>
+```
+
+After sourcing into it, install the requirements.txt
+
+```
+pip install requirements.txt
+```
 
 ## Run
-Navigate to main directory and run Convex_MPC.m
-Set 'use_Casadi'
-- 0: quadprog w/ MATLAB optimization
-- 1: qpoases w/ CasADi
+Navigate to main directory and run main.py
+
 
 
 ## References
