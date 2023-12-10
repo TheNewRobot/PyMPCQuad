@@ -387,7 +387,7 @@ def createfigure(X1, YMatrix1, YMatrix2, YMatrix3, YMatrix4, YMatrix5, YMatrix6,
         axs[0, 0].legend()
         axs[0, 0].grid(True)
         axs[0, 0].set_xlim([np.min(X1), np.max(X1)])
-        axs[0, 0].set_ylim([0, 40])
+        axs[0, 0].set_ylim([np.min(YMatrix1), np.max(YMatrix1)])
 
         axs[1, 0].plot(X1, YMatrix2[:, 0], linewidth=2, label='MPC')
         axs[1, 0].plot(X1, YMatrix2[:, 1], linewidth=2, label='ideal')
@@ -395,7 +395,7 @@ def createfigure(X1, YMatrix1, YMatrix2, YMatrix3, YMatrix4, YMatrix5, YMatrix6,
         axs[1, 0].legend()
         axs[1, 0].grid(True)
         axs[1, 0].set_xlim([np.min(X1), np.max(X1)])
-        axs[1, 0].set_ylim([0, 40])
+        axs[1, 0].set_ylim([np.min(YMatrix2), np.max(YMatrix2)])
 
         axs[2, 0].plot(X1, YMatrix3[:, 0], linewidth=2, label='MPC')
         axs[2, 0].plot(X1, YMatrix3[:, 1], linewidth=2, label='ideal')
@@ -403,7 +403,7 @@ def createfigure(X1, YMatrix1, YMatrix2, YMatrix3, YMatrix4, YMatrix5, YMatrix6,
         axs[2, 0].legend()
         axs[2, 0].grid(True)
         axs[2, 0].set_xlim([np.min(X1), np.max(X1)])
-        axs[2, 0].set_ylim([0, 40])
+        axs[2, 0].set_ylim([np.min(YMatrix3), np.max(YMatrix3)])
 
         axs[3, 0].plot(X1, YMatrix4[:, 0], linewidth=2, label='MPC')
         axs[3, 0].plot(X1, YMatrix4[:, 1], linewidth=2, label='ideal')
@@ -412,7 +412,7 @@ def createfigure(X1, YMatrix1, YMatrix2, YMatrix3, YMatrix4, YMatrix5, YMatrix6,
         axs[3, 0].legend()
         axs[3, 0].grid(True)
         axs[3, 0].set_xlim([np.min(X1), np.max(X1)])
-        axs[3, 0].set_ylim([0, 40])
+        axs[3, 0].set_ylim([np.min(YMatrix4), np.max(YMatrix4)])
 
         # state plots
         # Position of the Center of Mass in X and Y
@@ -424,7 +424,7 @@ def createfigure(X1, YMatrix1, YMatrix2, YMatrix3, YMatrix4, YMatrix5, YMatrix6,
         axs[0, 1].legend()
         axs[0, 1].grid(True)
         axs[0, 1].set_xlim([np.min(X1), np.max(X1)])
-        axs[0, 1].set_ylim([-0.2, 0.7])
+        axs[0, 1].set_ylim([np.min(YMatrix5), np.max(YMatrix5)])
 
         # Velocity of the Center of Mass in X and Y
         axs[1, 1].plot(X1, YMatrix6[:, 0], linewidth=2, label=r'$v_x$')
@@ -435,7 +435,7 @@ def createfigure(X1, YMatrix1, YMatrix2, YMatrix3, YMatrix4, YMatrix5, YMatrix6,
         axs[1, 1].legend()
         axs[1, 1].grid(True)
         axs[1, 1].set_xlim([np.min(X1), np.max(X1)])
-        axs[1, 1].set_ylim([-0.2, 0.8])
+        axs[1, 1].set_ylim([np.min(YMatrix6), np.max(YMatrix6)])
 
         # Euler angles of the SRB
         axs[2, 1].plot(X1, YMatrix7[:, 0], linewidth=2, label=r'$\phi$')
@@ -446,7 +446,7 @@ def createfigure(X1, YMatrix1, YMatrix2, YMatrix3, YMatrix4, YMatrix5, YMatrix6,
         axs[2, 1].legend()
         axs[2, 1].grid(True)
         axs[2, 1].set_xlim([np.min(X1), np.max(X1)])
-        axs[2, 1].set_ylim([-0.155368462626757, 1.1])
+        axs[2, 1].set_ylim([np.min(YMatrix7), np.max(YMatrix7)])
 
 
 
@@ -460,7 +460,7 @@ def createfigure(X1, YMatrix1, YMatrix2, YMatrix3, YMatrix4, YMatrix5, YMatrix6,
         axs[3, 1].legend()
         axs[3, 1].grid(True)
         axs[3, 1].set_xlim([np.min(X1), np.max(X1)])
-        axs[3, 1].set_ylim([-0.155368462626757, 1.2])
+        axs[3, 1].set_ylim([np.min(YMatrix8), np.max(YMatrix8)])
 
         plt.tight_layout()
         fig2.subplots_adjust(top=0.95)
@@ -488,6 +488,7 @@ def create_recording(ts,p):
         if img is None:
             print(f"Error reading frame_{ii}.png")
             continue 
-        vidfile.write(img)      
+        vidfile.write(img)    
+        time.sleep(0.1)  
     vidfile.release()
 

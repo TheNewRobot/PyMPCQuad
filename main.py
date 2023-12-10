@@ -34,7 +34,7 @@ p = get_params(gait)
 p['flag_movie'] = 1
 getcontext().prec = 28 
 use_Casadi = 0
-SimTimeDuration = 3
+SimTimeDuration = 2
 p['playSpeed'] = 20 # Increase this as multiples of 10
 
 p['predHorizon'] = 15 # N steps
@@ -47,7 +47,7 @@ p['p_ext'] = np.array([p['L']/2, p['W']/2, p['d']])
 MAX_ITER = int(np.floor(SimTimeDuration/p['simTimeStep']))
 
 if gait >=0:
-    p['yaw_d'] = np.pi/4
+    p['yaw_d'] = 0 # np.pi/4
     p['acc_d'] = 0.5
     p['vel_d'] = np.array([0.5*np.cos(p['yaw_d']), 0.5*np.sin(p['yaw_d'])]).reshape(-1,1)
     p['wb_d'] = np.array([0.0,0.0,0.0]).reshape(-1,1)
@@ -192,6 +192,7 @@ print(f"Elapsed Time for the simulation: {elapsed_time:.2f} seconds")
 if p['flag_movie']: 
    create_recording(t,p)
 
+time.sleep(3)
 print("\nAll simulations have finished. You can press control + C to quit the script after Figure 2 appears!") 
 
 fig_plot(tout,

@@ -163,6 +163,6 @@ def fcn_get_disturbance(t, p):
         w = 0.0
 
     u_ext = np.array([0.0, w, 0.0])
-    p_ext = np.array([p['L']/2, p['W']/2, p['d']])  # external force point in body frame
+    p_ext = p['p_dist']  # external force point in body frame
 
     return u_ext, p_ext

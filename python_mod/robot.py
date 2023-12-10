@@ -88,6 +88,9 @@ def  get_params(gait):
     p['leg_color'] = [56/255, 82/255, 156/255]  # black
     p['ground_color'] = [219/255, 219/255, 219/255]  # yellow
 
+    p['p_dist'] = np.array([p['L']/2, p['W']/2, p['d']])
+    #p['p_dist'] = np.array([0, 0, 0]) 
+
     return p
 
 def fcn_invKin3(X, pf, p,ii):
