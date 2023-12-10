@@ -19,11 +19,11 @@ python3 -m venv <myenvname>
 After sourcing into it, install the requirements.txt
 
 ```
-pip install requirements.txt
+pip install -r requirements.txt
 ```
 
 ## Run
-Navigate to main directory and run main.py
+Navigate to main directory and run main.py. Create a folder 'Figures_Python' in the root directory to store all the data from each experiment.
 
 
 
